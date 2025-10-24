@@ -1,0 +1,57 @@
+---
+title: "DataCleaning"
+output: html_document
+---
+
+''' Setup '''
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+''' Load Data '''
+```{r}
+data <- read.csv("../data/convertcsv.csv")
+```
+
+```{r}
+# Remove response column
+data_cleaned <- data %>% select(-Response)
+
+# Keep only unique context instances
+data_unique <- data_cleaned %>% distinct(Context) %>% 
+  drop_na()
+
+# Check structure
+head(data_unique)
+
+
+# Save data to csv without index column
+write.csv(data_unique, "../data/context_only_data.csv", row.names = FALSE)
+```
+
+
+
+```{r}
+# Check new cleaned data
+new_data <- read.csv("../data/context_only_data.csv")
+
+head(new_data)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
