@@ -1,0 +1,47 @@
+---
+title: "ID_and_merging_dfs"
+author: "Sofie Bøjgaard Thomsen"
+date: "2025-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages
+```{r}
+install.packages("dplyr")
+library(dplyr)
+```
+
+# Data
+```{r}
+# read data
+getwd()
+df <- read.csv("context_only_data.csv")
+head(df)
+```
+```{r}
+df <- df %>%
+  mutate(ID = paste0("context_", row_number()))
+
+df <- df %>%
+  select(ID, Context)
+```
+
+
+```{r}
+# Save the new csv-file ready for prompting
+write.csv(df, "context_ID.csv", row.names = FALSE)
+
+```
+
+```{r}
+longest <- max(nchar(df$Context)))
+print(nchar(longest$Context))
+
+
+```
+
+
