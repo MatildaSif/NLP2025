@@ -19,39 +19,34 @@ data <- read.csv("../data/convertcsv.csv")
 data_cleaned <- data %>% select(-Response)
 
 # Keep only unique context instances
-data_unique <- data_cleaned %>% distinct(Context) %>% 
+df <- data_cleaned %>% distinct(Context) %>% 
   drop_na()
 
 # Check structure
-head(data_unique)
-
-
-# Save data to csv without index column
-write.csv(data_unique, "../data/context_only_data.csv", row.names = FALSE)
+head(df)
 ```
 
 
 
 ```{r}
 # Check new cleaned data
-new_data <- read.csv("../data/context_only_data.csv")
+df <- read.csv("../data/context_only_data.csv")
 
-head(new_data)
+head(df)
 ```
 
+```{r}
+# get ID column
 
+df <- df %>%
+  mutate(ID = paste0("context_", row_number()))
 
+df <- df %>%
+  select(ID, Context)
 
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+# Save the new csv-file ready for prompting
+write.csv(df, "context_ID.csv", row.names = FALSE)
+```
