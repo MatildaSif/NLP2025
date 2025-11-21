@@ -41,7 +41,7 @@ def load_data(files_path, data_file):
     return df
 
 
-def create_csv(df, new_data_file):
+def create_csv(df, new_data_file, files_path):
     """
     Create csv from new data frame and save to data file path.
 
@@ -52,6 +52,7 @@ def create_csv(df, new_data_file):
     Returns:
         csv_data (csv): New saved csv file
     """
-    df__new = df.copy()
-    csv_data = df_new.to_csv(new_data_file, index = False)
+    df = df.copy()
+    data_path = os.path.join(files_path, new_data_file)
+    csv_data = df.to_csv(data_path, index = False)
     return csv_data

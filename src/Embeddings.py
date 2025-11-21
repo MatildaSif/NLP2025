@@ -38,7 +38,7 @@ def merge_dfs(dfs, files_path):
     
     final_df = reduce(lambda left, right: pd.merge(left, right, on="Context", how="inner"), dfs)
 
-    final_df = final_df.drop(columns=["ID_x", "ID_y"]) # remove extra ID columns
+    final_df = final_df[["ID","Context","Human_response", "FT_response", "GPT_response"]]
     # Make ID first column
     cols = final_df.columns.tolist()
     cols.insert(0, cols.pop(cols.index("ID")))
@@ -97,7 +97,7 @@ def create_embeddings(encoder, df, text_columns = None):
 model_name = "all-MiniLM-L6-v2"
 text_columns = ["Context", "Human_Response", "GPT_Response", "HF_Response"]
 files_path = "data/"
-data_file_list = ["context_ID.csv", "GPT_responses.csv", "HF_Responses.csv"]
+data_file_list = ["context_ID.csv", "Human_responses.csv", "GPT_responses.csv", "HF_Responses.csv"]
 data_file = "final_df.csv"
 
 

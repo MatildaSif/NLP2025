@@ -19,36 +19,58 @@ This script does 2 things:
 """
 
 import pandas as pd
+from utils import load_data, create_csv
 
-''' DF for prompting LLMS'''
+if __name__ == "__main__":
 
-# ---------- Load Data -----------
-data = pd.read_csv("/data/convertcsv.csv")
+    ''' Df with selected Human Response'''
 
-# ---------- Data Cleaning ----------
-# Remove 'Response' column if it exists
-if "Response" in data.columns:
-    data_cleaned = data.drop(columns=["Response"])
-else:
-    data_cleaned = data.copy()
+    # ---------- Load Data -----------
+    data = pd.read_csv("data/Original_Human_responses.csv")
 
-# Keep only unique Context values and drop rows with missing Context
-df = data_cleaned.dropna(subset=["Context"]).drop_duplicates(subset=["Context"])
+    #Select important columns
+    data = data[["questionID","questionText","answerText", "upvotes"]]
 
-# ---------- Add ID Column ----------
-df["ID"] = ["context_" + str(i+1) for i in range(len(df))]
+    # for each question keep those with the max upvotes
+    data["MaxUpvote"] = data.groupby("questionText")["upvotes"].transform("max")
 
-# Reorder columns to have ID first
-df = df[["ID", "Context"]]
+    # select only responses with max upvotes
+    top_responses = data[data["upvotes"] == data ["MaxUpvote"]].copy()
 
-# ---------- Save Cleaned CSV ----------
-df.to_csv("context_ID.csv", index=False)
+    # select one response if there are multiple with max upvote for that context
+    final_df = top_responses.groupby("questionText").sample(n=1, random_state =42)
+
+    # drop uneeded column
+    final_df = final_df.drop(columns=["MaxUpvote", "upvotes"]).reset_index(drop=True)
+
+    # Rename columns
+    final_df = final_df.rename(columns = {"questionID": "ID", "answerText": "Human_response", "questionText": "Context"})
+
+    create_csv(final_df, "Human_responses.csv", "data/")
 
 
 
+    ''' DF for prompting LLMS'''
+        
+    # ---------- Load Data -----------
+    data = pd.read_csv("data/Human_responses.csv")
 
-''' Df with selected Human Response'''
+    # ---------- Data Cleaning ----------
+    # Remove 'Response' column if it exists
+    if "Human_response" in data.columns:
+        data_cleaned = data.drop(columns=["Human_response"])
+    else:
+        data_cleaned = data.copy()
 
-# ---------- Load Data -----------
-data = pd.read_csv("/data/convertcsv.csv")
+    # Keep only unique Context values and drop rows with missing Context
+    df = data_cleaned.dropna(subset=["Context"]).drop_duplicates(subset=["Context"])
+
+    # ---------- Add ID Column ----------
+    df["ID"] = ["context_" + str(i+1) for i in range(len(df))]
+
+    # Reorder columns to have ID first
+    df = df[["ID", "Context"]]
+
+    # ---------- Save Cleaned CSV ----------
+    df.to_csv("data/context_ID.csv", index=False)
 
