@@ -90,7 +90,6 @@ model_name = "all-MiniLM-L6-v2"
 text_columns = ["Context", "Human_Response", "GPT_Response", "HF_Response"]
 files_path = "data/"
 data_file = "final.csv"
-df1 = 
 
 
 ''' Main '''

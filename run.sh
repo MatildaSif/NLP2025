@@ -4,7 +4,7 @@
 source ./env/bin/activate
 
 # BERT
-python src/TransformerModel.py
+python src/Embeddings.py
 
 # close the environment
 deactivate

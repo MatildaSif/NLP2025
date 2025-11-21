@@ -53,10 +53,10 @@ with open("context_ID.csv", newline="", encoding="utf-8") as f:
     for row in reader:
         prompt = build_prompt(row)
         response = call_gpt(prompt)
-        results.append({"ID": row["ID"], "Context": row["Context"], "response": response})
+        results.append({"ID": row["ID"], "Context": row["Context"], "GPT_response": response})
 
 # open/create output file 
 with open("GPT_responses.csv", "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=["ID", "Context", "response"]) # make sure that the csv-file uses dictionaries as well
+    writer = csv.DictWriter(f, fieldnames=["ID", "Context", "GPT_response"]) # make sure that the csv-file uses dictionaries as well
     writer.writeheader() # makes header row
     writer.writerows(results) #inputs results 
