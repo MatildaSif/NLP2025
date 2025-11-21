@@ -19,25 +19,33 @@ import torch
 from functools import reduce
 
 # Import custom utility functions
-from utils import create_csv, load_data, get_model, get_tokenizer
+from utils import load_data, create_csv
 
 
 ''' Functions '''
-def merge_dfs(df1, df2, df3, df4):
+def merge_dfs(dfs, files_path):
     """
-    Merge multiple DataFrames on 'Context', and rename each DataFrame's 'Response' column.
+    Merge multiple DataFrames on 'Context'.
 
     Parameters:
-        dfs (list of pd.DataFrame): List of DataFrames to merge. Each must have 'ID', 'Context', 'Response'.
-        response_names (list of str): List of names to rename the Response column in each DF.
+        dfs (list of pd.DataFrame): List of DataFrames to merge. Each must have 'Context'
 
     Returns:
-        pd.DataFrame: Merged DataFrame with renamed response columns.
+        pd.DataFrame: Merged DataFrame with renamed response columns called "final_df.csv"
     """
-    df = df1.merge(df2, on="Context", how="inner") \
-            .merge(df3, on="Context", how="inner") \
-            .merge(df4, on="Context", how="inner")
-    return df
+    if not dfs:
+        raise ValueError("The list of DataFrames is empty")
+    
+    final_df = reduce(lambda left, right: pd.merge(left, right, on="Context", how="inner"), dfs)
+
+    final_df = final_df.drop(columns=["ID_x", "ID_y"]) # remove extra ID columns
+    # Make ID first column
+    cols = final_df.columns.tolist()
+    cols.insert(0, cols.pop(cols.index("ID")))
+    final_df = final_df[cols]
+
+    create_csv(final_df, "final_df.csv", files_path)
+    return final_df
 
 
 def get_encoder(model_name):
@@ -89,7 +97,8 @@ def create_embeddings(encoder, df, text_columns = None):
 model_name = "all-MiniLM-L6-v2"
 text_columns = ["Context", "Human_Response", "GPT_Response", "HF_Response"]
 files_path = "data/"
-data_file = "final.csv"
+data_file_list = ["context_ID.csv", "GPT_responses.csv", "HF_Responses.csv"]
+data_file = "final_df.csv"
 
 
 ''' Main '''
@@ -99,8 +108,12 @@ if __name__ == "__main__":
     files_path = files_path
     data_file = data_file
 
-    df = merge_dfs(df1, df2, df3, df4)
+    dfs = []
+    for file in data_file_list:
+        df = load_data(files_path, file)
+        dfs.append(df)
+
+    df = merge_dfs(dfs, files_path) # creates df called final_df.csv
     encoder = get_encoder(model_name)
     df = load_data(files_path, data_file) # from utils
-   #df = df[["Context", "ID", ]] might not need or need to define the important columns
     df = create_embeddings(encoder, df, text_columns = text_columns)
