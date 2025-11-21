@@ -16,12 +16,30 @@ import sentence_transformers
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import torch
+from functools import reduce
 
 # Import custom utility functions
 from utils import create_csv, load_data, get_model, get_tokenizer
 
 
 ''' Functions '''
+def merge_dfs(df1, df2, df3, df4):
+    """
+    Merge multiple DataFrames on 'Context', and rename each DataFrame's 'Response' column.
+
+    Parameters:
+        dfs (list of pd.DataFrame): List of DataFrames to merge. Each must have 'ID', 'Context', 'Response'.
+        response_names (list of str): List of names to rename the Response column in each DF.
+
+    Returns:
+        pd.DataFrame: Merged DataFrame with renamed response columns.
+    """
+    df = df1.merge(df2, on="Context", how="inner") \
+            .merge(df3, on="Context", how="inner") \
+            .merge(df4, on="Context", how="inner")
+    return df
+
+
 def get_encoder(model_name):
     """
     Get Encoder
@@ -72,6 +90,7 @@ model_name = "all-MiniLM-L6-v2"
 text_columns = ["Context", "Human_Response", "GPT_Response", "HF_Response"]
 files_path = "data/"
 data_file = "final.csv"
+df1 = 
 
 
 ''' Main '''
@@ -81,6 +100,7 @@ if __name__ == "__main__":
     files_path = files_path
     data_file = data_file
 
+    df = merge_dfs(df1, df2, df3, df4)
     encoder = get_encoder(model_name)
     df = load_data(files_path, data_file) # from utils
    #df = df[["Context", "ID", ]] might not need or need to define the important columns
