@@ -14,6 +14,7 @@ import transformers
 import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
+from tqdm import tqdm
 
 # Import custom utility functions
 from utils import create_csv, load_data
@@ -44,7 +45,9 @@ def get_model(model_name):
     Returns:
         model (transformers.AutoModelForCausalLM): A configured Hugging Face model
     """
-    return AutoModelForCausalLM.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="balanced", torch_dtype="auto")
+    #model.to("cpu")
+    return model
 
 
 def generate_responses(df, model, tokenizer):
@@ -61,8 +64,9 @@ def generate_responses(df, model, tokenizer):
         df (pd.DataFrame): DataFrame with 'Context', 'ID' and 'Response' columns.
     """
     responses = []
-    for context in df["Context"]:
-        inputs = tokenizer(context, return_tensors="pt")
+    for idx, context in tqdm(enumerate(df["Context"]), total=len(df),
+                             desc="Generating responses", unit="row"):
+        inputs = tokenizer(context, return_tensors="pt").to(model.device)
         with torch.no_grad():
             output = model.generate(
                 **inputs,
@@ -75,8 +79,13 @@ def generate_responses(df, model, tokenizer):
             )
         response = tokenizer.decode(output[0], skip_special_tokens=True)
         responses.append(response)
+
+        # Print current ID safely
+        current_id = df["ID"].iloc[idx]
+        tqdm.write(f"Generated response for ID: {current_id}")
+
         #save responses to df in new column called "Response"
-    df["FT_response"] = response
+    df["FT_response"] = responses
     return df
 
 
@@ -97,3 +106,4 @@ if __name__ == "__main__":
     df = df[["Context", "ID"]]
     df = generate_responses(df, model, tokenizer)
     csv = create_csv(df, new_data_file)
+    print("Responses saved to responses.csv")
