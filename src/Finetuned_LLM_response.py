@@ -105,5 +105,5 @@ if __name__ == "__main__":
     df = load_data(files_path, data_file)
     df = df[["Context", "ID"]]
     df = generate_responses(df, model, tokenizer)
-    csv = create_csv(df, new_data_file)
+    csv = create_csv(df, new_data_file, files_path)
     print("Responses saved to responses.csv")
