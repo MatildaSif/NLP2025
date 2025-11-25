@@ -46,6 +46,9 @@ if __name__ == "__main__":
     # Rename columns
     final_df = final_df.rename(columns = {"questionID": "ID", "answerText": "Human_response", "questionText": "Context"})
 
+    # rename ID column to match later dfs
+    final_df["ID"] = ["context_" + str(i+1) for i in range(len(final_df))]
+
     create_csv(final_df, "Human_responses.csv", "data/")
 
 
@@ -64,9 +67,6 @@ if __name__ == "__main__":
 
     # Keep only unique Context values and drop rows with missing Context
     df = data_cleaned.dropna(subset=["Context"]).drop_duplicates(subset=["Context"])
-
-    # ---------- Add ID Column ----------
-    df["ID"] = ["context_" + str(i+1) for i in range(len(df))]
 
     # Reorder columns to have ID first
     df = df[["ID", "Context"]]
