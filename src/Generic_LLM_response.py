@@ -39,7 +39,7 @@ def call_gpt(prompt):
 # define function to build the prompt for each row while ignoring all previous contexts
 def build_prompt(row):
     return f"""Ignore all previous messages.
-Answer only this context and nothing else.
+Provide a standalone answer to this context and nothing else.
 
 ID: {row['ID']}
 Context: {row['Context']}
