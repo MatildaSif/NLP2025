@@ -77,7 +77,9 @@ def generate_responses(df, model, tokenizer):
                 repetition_penalty=1.2,
                 pad_token_id=tokenizer.eos_token_id
             )
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
+        # Keep only the newly generated tokens (exclude prompt)
+        generated_ids = output[0][inputs['input_ids'].shape[-1]:]
+        response = tokenizer.decode(generated_ids, skip_special_tokens=True)
         responses.append(response)
 
         # Print current ID safely
@@ -98,7 +100,7 @@ if __name__ == "__main__":
     model_name = model_name
     files_path = "data/"
     data_file = "context_ID.csv"
-    new_data_file = "HF_Responses.csv"
+    new_data_file = "FT_Responses.csv"
 
     tokenizer = get_tokenizer(model_name)
     model = get_model(model_name)

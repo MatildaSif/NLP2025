@@ -4,7 +4,7 @@
 source ./env/bin/activate
 
 # BERT
-python src/CosineDistances.py
+python src/DataCleaning .py
 
 # close the environment
 deactivate
