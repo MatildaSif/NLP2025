@@ -111,7 +111,7 @@ def create_embeddings(encoder, df, text_columns = None, save_path = None):
 model_name = "all-MiniLM-L6-v2"
 text_columns = ["Context", "Human_response", "GPT_response", "FT_response"]
 files_path = "data/"
-data_file_list = ["context_ID.csv", "Human_responses.csv", "GPT_responses.csv", "FT_Responses.csv"]
+data_file_list = ["context_ID.csv", "Human_responses.csv", "GPT_responses.csv", "FT_responses.csv"]
 data_file = "final_df.csv"
 save_path = "data/emb/"
 
