@@ -78,7 +78,7 @@ def generate_responses(df, model, tokenizer):
                 pad_token_id=tokenizer.eos_token_id
             )
         # Keep only the newly generated tokens (exclude prompt)
-        generated_ids = output[0][input_ids.shape[-1]:]
+        generated_ids = output[0][inputs['input_ids'].shape[-1]:]
         response = tokenizer.decode(generated_ids, skip_special_tokens=True)
         responses.append(response)
 

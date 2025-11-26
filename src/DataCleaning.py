@@ -29,7 +29,10 @@ if __name__ == "__main__":
     data = pd.read_csv("data/Original_Human_responses.csv")
 
     #Select important columns
-    data = data[["questionID","questionText","answerText", "upvotes"]]
+    data = data[["questionID","questionTitle", "questionText","answerText", "upvotes"]]
+
+    # combine text and title to one column for prompting
+    data["questionText"] = data["questionTitle"].fillna("").astype(str) + " " + data["questionText"].fillna("").astype(str)
 
     # for each question keep those with the max upvotes
     data["MaxUpvote"] = data.groupby("questionText")["upvotes"].transform("max")
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     final_df = top_responses.groupby("questionText").sample(n=1, random_state =42)
 
     # drop uneeded column
-    final_df = final_df.drop(columns=["MaxUpvote", "upvotes"]).reset_index(drop=True)
+    final_df = final_df.drop(columns=["MaxUpvote", "upvotes", "questionTitle"]).reset_index(drop=True)
 
     # Rename columns
     final_df = final_df.rename(columns = {"questionID": "ID", "answerText": "Human_response", "questionText": "Context"})
