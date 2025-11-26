@@ -18,9 +18,6 @@ Goals:
 
 ''' Setup '''
 
-#!pip install spacy
-#!python -m spacy download en_core_web_sm
-
 # loading packages
 import spacy
 import pandas as pd
@@ -29,85 +26,32 @@ import numpy as np
 #load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# Read file 
-df = pd.read_csv("/work/NLP2025/data/final_df.csv")
+# Paths
+FINAL_DF_PATH = "/work/NLP2025/data/final_df.csv"
+LEXICAL_ANALYSIS_PATH = "/work/NLP2025/data/lexical_analysis.csv"
+LEXICAL_SUMMARY_PATH = "/work/NLP2025/output/lexical_summary.csv"
+#WORDCOUNT_SUMMARY_PATH = "/work/NLP2025/output/word_count_summary.csv"
+#SENTENCE_SUMMARY_PATH = "/work/NLP2025/output/sentence_stats_summary.csv"
+#TTR_SUMMARY_PATH = "/work/NLP2025/output/ttr_summary.csv"
 
-''' Functions '''
+# Read file 
+df = pd.read_csv(FINAL_DF_PATH)
+
+# columns to be analyzed
+TEXT_COLS = ["Context", "Human_response", "FT_response", "GPT_response"]
+
+
+''' Defining functions '''
 
 # --- word counting function ---
 def spacy_word_count(text):
+    """Return number of alphabetic tokens (words) in the text using spaCy."""
     if not isinstance(text, str) or text.strip() == "":
         return 0
     doc = nlp(text)
     return sum(1 for token in doc if token.is_alpha)
 
-
-''' Define Parameters '''
-# --- list of columns to compute word counts for ---
-cols = ["Context", "Human_response", "FT_response", "response"]
-
-
-# --- create a new dataframe for lexical analysis ---
-lex_df = pd.DataFrame()
-lex_df["ID"] = df["ID"]
-
-
-
-
-
-
-
-''' Main '''
-# --- compute word count per row for each column ---
-for col in cols:
-    lex_df[f"{col}_word_count"] = df[col].apply(spacy_word_count)
-
-
-# --- save to CSV ---
-lex_df.to_csv("/work/NLP2025/data/lexical_analysis.csv", index=False)
-
-#lex_df.head()
-
-# Average number of words used in each column
-
-# Load your lexical analysis file
-lex = pd.read_csv("/work/NLP2025/data/lexical_analysis.csv")
-
-# Select only the word-count columns (everything except ID)
-word_count_cols = [col for col in lex.columns if col.endswith("_word_count")] # maybe make this into the other col_type? 
-
-# Compute and print the average word count for each column
-for col in word_count_cols:
-    avg = lex[col].mean()
-    print(f"Average words in {col}: {avg:.2f}") # <-                       doesn't work in py-files
-
-for col in word_count_cols:
-    col_min = lex[col].min()
-    col_max = lex[col].max()
-    print(f"{col}: min = {col_min}, max = {col_max}") # <-                  doesn't work in py-files
-
-
-
-# Compute summary statistics
-summary_df = pd.DataFrame({
-    "Mean": lex[word_count_cols].mean(),
-    "Min": lex[word_count_cols].min(),
-    "Max": lex[word_count_cols].max(),
-    "StdDev": lex[word_count_cols].std()
-})
-
-# Round results for nicer presentation
-summary_df = summary_df.round(2)
-
-# Print the table
-print(summary_df) # <-                                                      doesn't work in py-files
-
-# Save to CSV
-#summary_df.to_csv("/work/NLP2025/output/word_count_summary.csv") # <-      make this work in py-files
-
-
-
-# Total number of sentences and average sentence length
+# --- Total number of sentences and average sentence length ---
 def sentence_count(text):
     """Return number of sentences detected by spaCy."""
     if not isinstance(text, str) or text.strip() == "":
@@ -115,7 +59,7 @@ def sentence_count(text):
     doc = nlp(text)
     return len(list(doc.sents))
 
-
+# --- Calculate average sentence length (i.e. words per sentence) ---
 def avg_sentence_length(text):
     """Return avg words per sentence using spaCy alphabetic tokens."""
     if not isinstance(text, str) or text.strip() == "":
@@ -124,43 +68,13 @@ def avg_sentence_length(text):
     sentences = list(doc.sents)
     if len(sentences) == 0:
         return 0
-    
+
     # total words across sentences
     total_words = sum(len([t for t in sent if t.is_alpha]) for sent in sentences)
-    
     return total_words / len(sentences)
 
-
-    cols = ["Context", "Human_response", "FT_response", "response"] # <-      make this work in py-files
-
-# Create new dataframe to store results                              # <-      make this work in py-files
-sentence_df = pd.DataFrame()
-sentence_df["ID"] = df["ID"]
-
-# Compute per-row metrics
-for col in cols:
-    sentence_df[f"{col}_sentence_count"] = df[col].apply(sentence_count)
-    sentence_df[f"{col}_avg_sentence_length"] = df[col].apply(avg_sentence_length)
-
-
-# Select the new columns
-metrics = [col for col in sentence_df.columns if col != "ID"]
-
-# Build summary table
-summary = pd.DataFrame({
-    "Mean": sentence_df[metrics].mean(),
-    "Min": sentence_df[metrics].min(),
-    "Max": sentence_df[metrics].max(),
-    "StdDev": sentence_df[metrics].std()
-}).round(2)
-
-print(summary)                                                         # <-      make this work in py-files
-
-
-
-# Type-Token Ratio (TTR) → Unique words / total words
-
-#Define function using spaCy
+# ---- Type-Token Ratio (TTR) → Unique words / total words -----
+# Define function using spaCy
 def ttr_spacy(text):
     """Compute Type–Token Ratio for a text using spaCy alphabetic tokens."""
     if not isinstance(text, str) or text.strip() == "":
@@ -175,26 +89,93 @@ def ttr_spacy(text):
     return len(set(tokens)) / len(tokens)
 
 
-cols = ["Context", "Human_response", "FT_response", "response"] # <-                make this work in py-files
 
-ttr_df = pd.DataFrame()
-ttr_df["ID"] = df["ID"]
+''' Main '''
+if __name__ == "__main__":
+    #------------------ Word counts per row summary -------------------------
+    # --- create a new dataframe for lexical analysis ---
+    lex_df = pd.DataFrame()
+    lex_df["ID"] = df["ID"]
 
-for col in cols:
-    ttr_df[f"{col}_TTR"] = df[col].apply(ttr_spacy)
+    # --- compute word count per row for each column ---
+    for col in TEXT_COLS:
+        lex_df[f"{col}_word_count"] = df[col].apply(spacy_word_count)
+
+    # --- save per-row counts ---
+    lex_df.to_csv(LEXICAL_ANALYSIS_PATH, index=False)
+
+    # Select only the word-count columns (everything except ID)
+    word_count_cols = [col for col in lex_df.columns if col.endswith("_word_count")]
+
+    # Compute summary statistics
+    wordcount_summary = pd.DataFrame({
+        "Mean": lex_df[word_count_cols].mean(),
+        "Min": lex_df[word_count_cols].min(),
+        "Max": lex_df[word_count_cols].max(),
+        "SD": lex_df[word_count_cols].std()
+    }).round(2)
+
+    # save summary
+    #wordcount_summary.to_csv(WORDCOUNT_SUMMARY_PATH)
+
+    # ----------- Sentence counts + Average sentence length -------------
+    # Create new dataframe to store results                             
+    sentence_df = pd.DataFrame()
+    sentence_df["ID"] = df["ID"]
+
+    # Compute per-row metrics
+    for col in TEXT_COLS:
+        sentence_df[f"{col}_sentence_count"] = df[col].apply(sentence_count)
+        sentence_df[f"{col}_avg_sentence_length"] = df[col].apply(avg_sentence_length)
+
+    # Select the new columns
+    metrics = [col for col in sentence_df.columns if col != "ID"]
+
+    # Build summary table
+    sentence_summary = pd.DataFrame({
+        "Mean": sentence_df[metrics].mean(),
+        "Min": sentence_df[metrics].min(),
+        "Max": sentence_df[metrics].max(),
+        "SD": sentence_df[metrics].std()
+    }).round(2)
+
+    # Load your lexical analysis file
+    lex = pd.read_csv("/work/NLP2025/data/lexical_analysis.csv")
+
+    # Compute and print the average word count for each column
+    for col in word_count_cols:
+        avg = lex[col].mean()
+
+    for col in word_count_cols:
+        col_min = lex[col].min()
+        col_max = lex[col].max()
+    
+    #sentence_summary.to_csv(SENTENCE_SUMMARY_PATH)
+
+    # ---------- Type-Token Ratio per row and summary ----------
+    ttr_df = pd.DataFrame()
+    ttr_df["ID"] = df["ID"]
+
+    for col in TEXT_COLS:
+        ttr_df[f"{col}_TTR"] = df[col].apply(ttr_spacy)
 
 
-ttr_metrics = [col for col in ttr_df.columns if col.endswith("_TTR")]
+    ttr_metrics = [col for col in ttr_df.columns if col.endswith("_TTR")]
 
-ttr_summary = pd.DataFrame({
-    "Mean": ttr_df[ttr_metrics].mean(),
-    "Min": ttr_df[ttr_metrics].min(),
-    "Max": ttr_df[ttr_metrics].max(),
-    "StdDev": ttr_df[ttr_metrics].std()
-}).round(3)
+    ttr_summary = pd.DataFrame({
+        "Mean": ttr_df[ttr_metrics].mean(),
+        "Min": ttr_df[ttr_metrics].min(),
+        "Max": ttr_df[ttr_metrics].max(),
+        "SD": ttr_df[ttr_metrics].std()
+    }).round(3)
 
-#print(ttr_summary) # <-                                                                make this work in py-files
+    #ttr_summary.to_csv(TTR_SUMMARY_PATH)
 
+    # --------------- Combine into a single output dataframe ----------------
+    lexical_summary = pd.concat(
+        [wordcount_summary, sentence_summary, ttr_summary],
+        axis=0
+    )
 
-
-
+    # Save to one file
+    lexical_summary.to_csv(LEXICAL_SUMMARY_PATH)
