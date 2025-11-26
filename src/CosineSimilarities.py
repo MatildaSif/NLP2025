@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import seaborn as sns
 import pandas as pd
+import umap
 
 
 
@@ -55,32 +56,6 @@ def compute_average_cosine_similarity(save_path, column_pairs):
 
     return avg_cos_sim, rowwise_sims # also get row-wise sim for later plotting
 
-    
-def plot_average_distances(avg_cos_sim, output_path, filename):
-    """
-    Plot averaged cosine distances
-
-    Args:
-        avg_cos_sim (dict): dictionary with the average cosine similarities 
-        output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-    """
-
-    # Ensure save directory exists
-    os.makedirs(output_path, exist_ok=True)
-
-    plt.figure(figsize=(8, 5))
-    plt.bar(avg_cos_sim.keys(), avg_cos_sim.values(), color=["blue", "pink", "red"])
-    plt.ylabel("Average Cosine Similarity")
-    plt.title("Average Cosine Similarity Across Column Pairs")
-    plt.xticks(rotation=30)
-    plt.tight_layout()
-    
-    save_file = os.path.join(output_path, filename)
-    plt.savefig(save_file)
-    plt.close()
-    print(f"Average cosine distance plot saved to: {save_file}")
-
 
 
 def plot_mean_embeddings(save_path, columns, output_path, filename):
@@ -105,9 +80,10 @@ def plot_mean_embeddings(save_path, columns, output_path, filename):
     labels = list(mean_embeds.keys())
     X_mean = np.stack(list(mean_embeds.values()))
 
-    # PCA to 2D
-    pca = PCA(n_components=2, random_state=42)
-    X_2d = pca.fit_transform(X_mean)
+    # Umap to 2D
+    n_neighbors = min(15, len(X_mean) - 1)
+    reducer = umap.UMAP(n_components=2, n_neighbors=n_neighbors)    
+    X_2d = reducer.fit_transform(X_mean)
 
     # Plot points
     plt.figure(figsize=(6,6))
@@ -117,7 +93,7 @@ def plot_mean_embeddings(save_path, columns, output_path, filename):
     for i, label in enumerate(labels):
         plt.text(X_2d[i,0]+0.01, X_2d[i,1]+0.01, label, fontsize=12)
 
-    plt.title("Mean Embeddings Projected to 2D (PCA)")
+    plt.title("Mean Embeddings Projected to 2D (UMAP)")
     plt.xlabel("PC1")
     plt.ylabel("PC2")
     plt.grid(True)
@@ -125,37 +101,91 @@ def plot_mean_embeddings(save_path, columns, output_path, filename):
     save_file = os.path.join(output_path, filename)
     plt.savefig(save_file)
     plt.close()
-    print(f"Average cosine similarity plot saved to: {save_file}")
+    print(f"Mean Embeddings Projected plot saved to: {save_file}")
 
 
-def plot_histogram(rowwise_sims, output_path, filename):
+
+def plot_all_embeddings(save_path, columns, output_path, filename):
     """
-    Plot histogram of row-wise cosine similarities
+    Load ALL embeddings for each column, PCA-project them to 2D,
+    plot each embedding as a point, and also show mean embeddings.
 
     Args:
-        rowwise_sim (dict): dictionary with the row-wise cosine similarities 
+        save_path (str): folder where .npy embeddings are stored
+        columns (list[str]): list of column names whose embeddings to load
         output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-
+        filename (str): name of file to be saved (e.g., "pca_all.png")
     """
+
+    # Ensure output directory exists
     os.makedirs(output_path, exist_ok=True)
 
-    plt.figure(figsize=(8,5))
-    for name, sims in rowwise_sims.items():
-        plt.hist(sims, bins=50, alpha=0.5, label=name)
-    plt.xlabel("Cosine Similarity")
-    plt.ylabel("Count")
-    plt.title("Distribution of Context-Response Cosine Similarities")
+    # Load embeddings for each column
+    all_embeds = []
+    labels = []
+    mean_points = []
+
+    for col in columns:
+        X = np.load(os.path.join(save_path, f"emb-{col}.npy"))
+
+        # store all points
+        all_embeds.append(X)
+        labels.extend([col] * len(X))
+
+        # store mean embedding
+        mean_points.append(X.mean(axis=0))
+
+    # stack all embeddings into one matrix
+    X_all = np.vstack(all_embeds)
+    X_mean = np.vstack(mean_points)
+
+    # Umap to 2D
+    n_neighbors = min(15, len(X_all) - 1)
+    reducer = umap.UMAP(n_components=2, n_neighbors=n_neighbors)
+    X_all_2d = reducer.fit_transform(X_all)
+    X_mean_2d = reducer.fit_transform(X_mean)
+
+    # plot
+    plt.figure(figsize=(8,8))
+
+    # color palette for each column
+    color_map = {
+        col: color for col, color in zip(columns, ["blue","green","orange","red","purple","brown"])
+    }
+
+    # plot all points
+    for col in columns:
+        idxs = [i for i, lbl in enumerate(labels) if lbl == col]
+        pts = X_all_2d[idxs]
+        plt.scatter(
+            pts[:,0], pts[:,1],
+            s=20, alpha=0.6,
+            label=f"{col} (individual)", 
+            color=color_map[col]
+        )
+
+    # plot mean embeddings as large markers
+    for i, col in enumerate(columns):
+        plt.scatter(
+            X_mean_2d[i,0], X_mean_2d[i,1],
+            s=200,
+            marker="X",
+            edgecolor="black",
+            linewidth=1.2,
+            color=color_map[col],
+            label=f"{col} mean"
+        )
+
+    plt.title("All Individual Embeddings + Mean Embeddings (UMAP 2D)")
+    plt.xlabel("PC1")
+    plt.ylabel("PC2")
+    plt.grid(True)
     plt.legend()
-    plt.tight_layout()
 
     save_file = os.path.join(output_path, filename)
-    plt.savefig(save_file)
+    plt.savefig(save_file, dpi=300)
     plt.close()
-    print(f"Histogram of Context-Response Cosine Similarities plot saved to: {save_file}")
-
-
-
+    print(f"UMAP plot (all embeddings + means) saved to: {save_file}")
 
 
 def plot_kde(rowwise_sims, output_path, filename):
@@ -249,16 +279,19 @@ def plot_heatmap(rowwise_sims, output_path, filename):
 ''' Define Parameters '''
 save_path = "data/emb/"
 output_path = "output/"
+
+# The following are all lowercase to reflect the naming of the embedding files!
 column_pairs_topic = [
     ("context", "human_response"),
     ("context", "ft_response"),
-    ("context", "response")
+    ("context", "gpt_response")
 ]
 column_pairs_human = [
-    ("ft_response", "response"),
+    ("ft_response", "gpt_response"),
     ("human_response", "ft_response"),
-    ("human_response", "response")
+    ("human_response", "gpt_response")
 ]
+
 
 ''' Main '''
 if __name__ == "__main__":
@@ -271,18 +304,15 @@ if __name__ == "__main__":
     avg_cos_sim, rowwise_sims = compute_average_cosine_similarity(save_path, column_pairs = column_pairs_topic)
     print("Average Cosine Similarities:", avg_cos_sim)
 
-    # Plot average distances
-    plot_average_distances(avg_cos_sim, output_path, filename = "topic_avg_cosine_distance.png")
-
-    # Plot mean embeddings after PCA
-    columns = ["context", "human_response", "ft_response", "response"]
-    plot_mean_embeddings(save_path, columns, output_path, filename = "topic_mean_embeddings_PCA.png")
+    # Plot mean embeddings after Umap
+    columns = ["context", "human_response", "ft_response", "gpt_response"]
+    plot_mean_embeddings(save_path, columns, output_path, filename = "Topic_mean_embeddings_UMAP.png")
+    plot_all_embeddings(save_path, columns, output_path, filename = "All_embeddings_UMAP.png")
 
     # Plot
-    plot_histogram(rowwise_sims, output_path, filename = "topic_cosine_similarity_histogram.png")
-    plot_kde(rowwise_sims, output_path, filename ="topic_cosine_similarity_kde.png")
-    plot_violin(rowwise_sims, output_path, filename ="topic_cosine_similarity_violin.png")
-    plot_heatmap(rowwise_sims, output_path, filename ="topic_cosine_similarity_heatmap.png")
+    plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde.png")
+    plot_violin(rowwise_sims, output_path, filename ="Topic_cosine_similarity_violin.png")
+    plot_heatmap(rowwise_sims, output_path, filename ="Topic_cosine_similarity_heatmap.png")
 
 
 
@@ -292,15 +322,12 @@ if __name__ == "__main__":
     avg_cos_sim, rowwise_sims = compute_average_cosine_similarity(save_path, column_pairs = column_pairs_human)
     print("Average Cosine Similarities:", avg_cos_sim)
 
-    # Plot average distances
-    plot_average_distances(avg_cos_sim, output_path, filename = "human_avg_cosine_distance.png")
-
-    # Plot mean embeddings after PCA
-    columns = ["context", "human_response", "ft_response", "response"]
-    plot_mean_embeddings(save_path, columns, output_path, filename = "human_mean_embeddings_PCA.png")
+    # Plot mean embeddings after Umap
+    columns = ["context", "human_response", "ft_response", "gpt_response"]
+    plot_mean_embeddings(save_path, columns, output_path, filename = "Mean_embeddings_UMAP.png")
+    plot_all_embeddings(save_path, columns, output_path, filename = "All_embeddings_UMAP.png")
 
     # Plot
-    plot_histogram(rowwise_sims, output_path, filename = "human_cosine_similarity_histogram.png")
-    plot_kde(rowwise_sims, output_path, filename ="human_cosine_similarity_kde.png")
-    plot_violin(rowwise_sims, output_path, filename ="human_cosine_similarity_violin.png")
-    plot_heatmap(rowwise_sims, output_path, filename ="human_cosine_similarity_heatmap.png")
+    plot_kde(rowwise_sims, output_path, filename ="Human_cosine_similarity_kde.png")
+    plot_violin(rowwise_sims, output_path, filename ="Human_cosine_similarity_violin.png")
+    plot_heatmap(rowwise_sims, output_path, filename ="Human_cosine_similarity_heatmap.png")

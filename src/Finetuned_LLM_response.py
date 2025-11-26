@@ -98,7 +98,7 @@ if __name__ == "__main__":
     model_name = model_name
     files_path = "data/"
     data_file = "context_ID.csv"
-    new_data_file = "HF_Responses.csv"
+    new_data_file = "FT_Responses.csv"
 
     tokenizer = get_tokenizer(model_name)
     model = get_model(model_name)
