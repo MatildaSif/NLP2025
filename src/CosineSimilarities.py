@@ -94,8 +94,8 @@ def plot_mean_embeddings(save_path, columns, output_path, filename):
         plt.text(X_2d[i,0]+0.01, X_2d[i,1]+0.01, label, fontsize=12)
 
     plt.title("Mean Embeddings Projected to 2D (UMAP)")
-    plt.xlabel("PC1")
-    plt.ylabel("PC2")
+    plt.xlabel("UMAP-1")
+    plt.ylabel("UMAP-2")
     plt.grid(True)
     
     save_file = os.path.join(output_path, filename)
@@ -103,89 +103,6 @@ def plot_mean_embeddings(save_path, columns, output_path, filename):
     plt.close()
     print(f"Mean Embeddings Projected plot saved to: {save_file}")
 
-
-
-def plot_all_embeddings(save_path, columns, output_path, filename):
-    """
-    Load ALL embeddings for each column, PCA-project them to 2D,
-    plot each embedding as a point, and also show mean embeddings.
-
-    Args:
-        save_path (str): folder where .npy embeddings are stored
-        columns (list[str]): list of column names whose embeddings to load
-        output_path (str): folder where plots should be saved
-        filename (str): name of file to be saved (e.g., "pca_all.png")
-    """
-
-    # Ensure output directory exists
-    os.makedirs(output_path, exist_ok=True)
-
-    # Load embeddings for each column
-    all_embeds = []
-    labels = []
-    mean_points = []
-
-    for col in columns:
-        X = np.load(os.path.join(save_path, f"emb-{col}.npy"))
-
-        # store all points
-        all_embeds.append(X)
-        labels.extend([col] * len(X))
-
-        # store mean embedding
-        mean_points.append(X.mean(axis=0))
-
-    # stack all embeddings into one matrix
-    X_all = np.vstack(all_embeds)
-    X_mean = np.vstack(mean_points)
-
-    # Umap to 2D
-    n_neighbors = min(15, len(X_all) - 1)
-    reducer = umap.UMAP(n_components=2, n_neighbors=n_neighbors)
-    X_all_2d = reducer.fit_transform(X_all)
-    X_mean_2d = reducer.fit_transform(X_mean)
-
-    # plot
-    plt.figure(figsize=(8,8))
-
-    # color palette for each column
-    color_map = {
-        col: color for col, color in zip(columns, ["blue","green","orange","red","purple","brown"])
-    }
-
-    # plot all points
-    for col in columns:
-        idxs = [i for i, lbl in enumerate(labels) if lbl == col]
-        pts = X_all_2d[idxs]
-        plt.scatter(
-            pts[:,0], pts[:,1],
-            s=20, alpha=0.6,
-            label=f"{col} (individual)", 
-            color=color_map[col]
-        )
-
-    # plot mean embeddings as large markers
-    for i, col in enumerate(columns):
-        plt.scatter(
-            X_mean_2d[i,0], X_mean_2d[i,1],
-            s=200,
-            marker="X",
-            edgecolor="black",
-            linewidth=1.2,
-            color=color_map[col],
-            label=f"{col} mean"
-        )
-
-    plt.title("All Individual Embeddings + Mean Embeddings (UMAP 2D)")
-    plt.xlabel("PC1")
-    plt.ylabel("PC2")
-    plt.grid(True)
-    plt.legend()
-
-    save_file = os.path.join(output_path, filename)
-    plt.savefig(save_file, dpi=300)
-    plt.close()
-    print(f"UMAP plot (all embeddings + means) saved to: {save_file}")
 
 
 def plot_kde(rowwise_sims, output_path, filename):
@@ -307,8 +224,7 @@ if __name__ == "__main__":
     # Plot mean embeddings after Umap
     columns = ["context", "human_response", "ft_response", "gpt_response"]
     plot_mean_embeddings(save_path, columns, output_path, filename = "Topic_mean_embeddings_UMAP.png")
-    plot_all_embeddings(save_path, columns, output_path, filename = "All_embeddings_UMAP.png")
-
+    
     # Plot
     plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde.png")
     plot_violin(rowwise_sims, output_path, filename ="Topic_cosine_similarity_violin.png")
@@ -325,7 +241,6 @@ if __name__ == "__main__":
     # Plot mean embeddings after Umap
     columns = ["context", "human_response", "ft_response", "gpt_response"]
     plot_mean_embeddings(save_path, columns, output_path, filename = "Mean_embeddings_UMAP.png")
-    plot_all_embeddings(save_path, columns, output_path, filename = "All_embeddings_UMAP.png")
 
     # Plot
     plot_kde(rowwise_sims, output_path, filename ="Human_cosine_similarity_kde.png")
