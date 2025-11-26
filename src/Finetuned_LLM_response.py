@@ -77,7 +77,9 @@ def generate_responses(df, model, tokenizer):
                 repetition_penalty=1.2,
                 pad_token_id=tokenizer.eos_token_id
             )
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
+        # Keep only the newly generated tokens (exclude prompt)
+        generated_ids = output[0][input_ids.shape[-1]:]
+        response = tokenizer.decode(generated_ids, skip_special_tokens=True)
         responses.append(response)
 
         # Print current ID safely
