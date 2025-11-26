@@ -32,7 +32,7 @@ if __name__ == "__main__":
     data = data[["questionID","questionTitle", "questionText","answerText", "upvotes"]]
 
     # combine text and title to one column for prompting
-    data["questionText"] = data["questionTitle"].fillna("").astype(str) + " " + data["questionText"].fillna("").astype(str)
+    data["questionText"] = data["questionTitle"].fillna("").astype(str) + ". " + data["questionText"].fillna("").astype(str)
 
     # for each question keep those with the max upvotes
     data["MaxUpvote"] = data.groupby("questionText")["upvotes"].transform("max")
