@@ -4,7 +4,7 @@
 source ./env/bin/activate
 
 # BERT
-python src/Finetuned_LLM_response.py
+python src/SentimentClassification.py
 
 # close the environment
 deactivate

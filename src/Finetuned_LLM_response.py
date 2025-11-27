@@ -86,8 +86,9 @@ def generate_responses(df, model, tokenizer):
         current_id = df["ID"].iloc[idx]
         tqdm.write(f"Generated response for ID: {current_id}")
 
-        #save responses to df in new column called "Response"
+    #save responses to df in new column called "FT_response"
     df["FT_response"] = responses
+    df["FT_response"] = df["FT_response"].str.replace('[/INST]', '', regex=False)
     return df
 
 
