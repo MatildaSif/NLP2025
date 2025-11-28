@@ -2,7 +2,7 @@ matplotlib==3.10.7
 numpy==2.3.5
 openai==2.8.1
 pandas==2.3.3
-python-dotenv==1.2.1
+python-dotenv==1.2.1 #kan muligvis fjernes da Sof ikke skal bruge den mere.
 scikit_learn==1.7.2
 seaborn==0.13.2
 sentence_transformers==5.1.2

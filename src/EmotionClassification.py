@@ -27,7 +27,7 @@ emotion_classifier = pipeline(
 )
 # defining paths
 FINAL_DF_PATH = "/work/NLP2025/data/final_df.csv"
-OUTPUT_PATH = "/work/NLP2025/data/emotion_analysis.csv"
+OUTPUT_PATH = "/work/NLP2025/output/emotion_analysis.csv"
 
 # Load data
 df = pd.read_csv(FINAL_DF_PATH)
@@ -84,3 +84,22 @@ if __name__ == "__main__":
 
     # Save emotional analysis results
     df.to_csv(OUTPUT_PATH, index=False)
+
+    # -------- Create trimmed output DataFrame --------
+    output_cols = ["ID"]
+
+    # Add emotion-score dicts
+    for col in emotion_cols:
+        output_cols.append(f"{col}_emotion")
+
+    # Add similarity scores
+    for col in ["Human_response", "FT_response", "GPT_response"]:
+        output_cols.append(f"{col}_emotion_similarity")
+
+    # keep only the selected columns
+    emotion_df = df[output_cols]
+
+    # Save emotional analysis results
+    emotion_df.to_csv(OUTPUT_PATH, index=False)
+    print("Emotion analysis saved to:", OUTPUT_PATH)
+
