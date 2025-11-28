@@ -19,7 +19,6 @@ from utils import load_data, create_csv
 from tqdm import tqdm
 
 ''' Functions'''
-
 def sentiment_classification(pipeline, df, text_columns=None, save_path=None):
     if text_columns is None:
         text_columns = [col for col in df.columns if df[col].dtype == "object"]
@@ -27,21 +26,32 @@ def sentiment_classification(pipeline, df, text_columns=None, save_path=None):
     if save_path is not None:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    batch_size = 4  # adjust as needed
+    batch_size = 4
 
     for col in text_columns:
         print(f"Classifying column: {col}")
+        pos_probs = []
+        neg_probs = []
 
-        all_labels = []
         texts = df[col].fillna("").tolist()
 
         for i in tqdm(range(0, len(texts), batch_size)):
             batch = texts[i:i+batch_size]
             results = pipeline(batch, truncation=True, max_length=512)
-            batch_labels = [1 if r['label'].upper() == 'POSITIVE' else 0 for r in results]
-            all_labels.extend(batch_labels)
 
-        df[f"sent_{col.lower()}"] = all_labels
+            for r in results:
+                if r["label"].upper() == "POSITIVE":
+                    prob_pos = r["score"]
+                else:
+                    prob_pos = 1 - r["score"]
+
+                prob_neg = 1 - prob_pos
+
+                pos_probs.append(prob_pos)
+                neg_probs.append(prob_neg)
+
+        df[f"prob_pos_{col.lower()}"] = pos_probs
+        df[f"prob_neg_{col.lower()}"] = neg_probs
 
     if save_path is not None:
         df.to_csv(save_path, index=False)
