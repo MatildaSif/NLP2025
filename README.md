@@ -8,6 +8,8 @@ In order to run the Generic_LLM_response.py, ensure you have a txt-file with a p
 In order to run the Generic_LLM_response.py, ensure you have a OpenAI API-key to generate prompt responses. 
 Create a txt-file called .env (with no file-type-name shown) and place it in the folder with the script. This file should not be pushed to GitHub. 
 
+ORRRR Create a file named api_key.txt in the project folder and paste in your API key.
+
 ### Have access to GPUs
 In order to run Finetuned_LLM_response.py you need GPUs. It take a long time so be patient. 
 
