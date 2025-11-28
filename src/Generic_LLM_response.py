@@ -1,17 +1,32 @@
 # --------- API - GENERIC LLM RESPONSE GENERATION ------------
 
+
 # --------- Setup ----------
 #load packages
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 import csv
 from openai import OpenAI
+from tqdm import tqdm
+
+# Load API key - MAKE SURE TO HAVE A TXT-FILE CALLED api_key.txt IN NLP2025 IN ORDER TO RUN THIS
+def load_api_key():
+    try:
+        with open("api_key.txt", "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        raise ValueError("API key file 'api_key.txt' not found. Please create it and put your API key inside.")
+
+API_KEY = load_api_key()
+
+client = OpenAI(api_key=API_KEY)
+
 
 #note that you have to have a .env file with the API key for producing generic LLM responses
-load_dotenv()  # reads .env file automatically 
+#load_dotenv()  # reads .env file automatically 
 
 # Retrieves the API key and creates the client that we will use to send prompts to GPT models
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+#client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ------------ TEST and model availability list------------
 # sanity check to figure out whether API key works
@@ -46,11 +61,11 @@ Context: {row['Context']}
 """
 # ------------- Running the functions ----------------
 # opens the CSV-file
-with open("context_ID.csv", newline="", encoding="utf-8") as f:
-    reader = csv.DictReader(f) #reads the file as a dictionary
+with open("/work/NLP2025/data/context_ID.csv", newline="", encoding="utf-8") as f:
+    reader = list(csv.DictReader(f)) # the file as a dictionary 
     results = [] #creates empty list for results
     #loop to go through each row, build the prompt, create response from GPT, save the output
-    for row in reader:
+    for row in tqdm(reader, desc="Generating GPT responses"):
         prompt = build_prompt(row)
         response = call_gpt(prompt)
         results.append({"ID": row["ID"], "Context": row["Context"], "GPT_response": response})
