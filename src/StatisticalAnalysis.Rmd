@@ -1,0 +1,190 @@
+---
+title: "StatisticalAnalysis"
+output: html_document
+---
+
+```{r}
+# setup
+library(tidyverse)
+library(broom)
+library(ggplot2)
+install.packages("betareg")
+library(betareg)
+library(broom)
+install.packages("emmeans")
+library(emmeans)
+```
+
+# Beta Regression
+
+```{r}
+getwd()
+df <- read.csv("../data/final_df_sentiment.csv")
+```
+
+```{r}
+df_long <- df %>% 
+  select(ID, prob_pos_context, prob_pos_human_response, prob_pos_ft_response, prob_pos_gpt_response
+  ) %>% 
+  pivot_longer(
+    cols = c(prob_pos_human_response, prob_pos_ft_response, prob_pos_gpt_response),
+    names_to = "response_type",
+    values_to = "response_prob"
+  ) %>%
+  mutate(
+    context_prob = prob_pos_context,
+    is_ft = ifelse(response_type == "prob_pos_ft_response", 1, 0),
+    is_gpt = ifelse(response_type == "prob_pos_gpt_response", 1, 0)
+  )
+```
+
+```{r}
+# fix any probabilities that are 0 or 1 - need to be within 0-1
+eps <- 1e-5
+df_long$response_prob <- (df_long$response_prob * (1 - 2*eps)) + eps
+df_long$context_prob  <- (df_long$context_prob * (1 - 2*eps)) + eps
+
+```
+
+
+### Models
+```{r}
+m3 <- betareg(
+  response_prob ~ context_prob + is_ft + is_gpt,
+  data = df_long
+)
+
+summary(m3)
+
+
+m4 <- betareg(
+  response_prob ~ context_prob * is_ft + context_prob * is_gpt,
+  data = df_long
+)
+
+summary(m4)
+
+```
+INTERPRETATION GUIDE
+
+Coefficients are on a log-odds scale (like logistic)
+Positive coefficients → higher predicted positivity
+Negative coefficients → lower predicted positivity.
+
+Key terms:
+context_prob     : more positive context → more positive response
+is_ft            : FT more (or less) positive than human
+is_gpt           : GPT more (or less) positive than human
+context_prob:is_ft   : FT differs from humans in coherence strength
+context_prob:is_gpt  : GPT differs from humans in coherence strength
+
+
+```{r}
+# Test/compare models 
+lrtest(m3, m4)  # Likelihood ratio test
+   AIC(m3, m4)     # Compare model fit
+```
+
+```{r}
+# Check model assumptions
+plot(m3)  # Residual diagnostics
+```
+
+```{r}
+# Predicted Probabilities - compare responses under negative context (0) and positive context (1)
+# Create prediction data - one row per combination
+pred_data <- data.frame(
+  context_prob = rep(c(0.01, 0.99), each = 3),
+  is_ft = rep(c(0, 1, 0), times = 2),
+  is_gpt = rep(c(0, 0, 1), times = 2),
+  response_type = rep(c("Human", "FT", "GPT"), times = 2)
+)
+
+# Get predictions
+pred_data$predicted_prob <- predict(m3, newdata = pred_data, type = "response")
+
+print(pred_data)
+
+```
+
+```{r}
+# Visualise
+
+ggplot(pred_data, aes(
+  x = response_type,
+  y = predicted_prob,
+  fill = as.factor(context_prob)
+)) +
+  geom_col(position = position_dodge()) +
+  labs(
+    x = "Responder Type",
+    y = "Predicted Positivity Probability",
+    fill = "Context Sentiment\n(0 = Negative, 1 = Positive)",
+    title = "Predicted Sentiment Probabilities from Beta Regression"
+  ) +
+  ylim(0,1)
+
+```
+
+
+### Post-hoc contrasts
+Compare predicted probabilities between groups (FT vs Human, GPT vs Human) for a given context.
+```{r}
+# separate diff sentiment contexts
+# Create prediction data - one row per combination
+pred_data <- data.frame(
+  context_prob = rep(c(0.01, 0.99), each = 3),
+  is_ft = rep(c(0, 1, 0), times = 2),
+  is_gpt = rep(c(0, 0, 1), times = 2),
+  response_type = rep(c("Human", "FT", "GPT"), times = 2)
+)
+
+# Get predictions
+pred_data$predicted_prob <- predict(m3, newdata = pred_data, type = "response")
+```
+
+### Get contrasts
+```{r}
+# Separate by context
+pred_neg <- pred_data %>% filter(context_prob < 0.5)
+pred_pos <- pred_data %>% filter(context_prob > 0.5)
+
+# Compute point estimate contrasts
+contrasts <- data.frame(
+  context = c("Negative", "Negative", "Positive", "Positive"),
+  contrast = c("FT_vs_Human", "GPT_vs_Human", "FT_vs_Human", "GPT_vs_Human"),
+  difference = c(
+    pred_neg$predicted_prob[pred_neg$response_type == "FT"] - 
+      pred_neg$predicted_prob[pred_neg$response_type == "Human"],
+    pred_neg$predicted_prob[pred_neg$response_type == "GPT"] - 
+      pred_neg$predicted_prob[pred_neg$response_type == "Human"],
+    pred_pos$predicted_prob[pred_pos$response_type == "FT"] - 
+      pred_pos$predicted_prob[pred_pos$response_type == "Human"],
+    pred_pos$predicted_prob[pred_pos$response_type == "GPT"] - 
+      pred_pos$predicted_prob[pred_pos$response_type == "Human"]
+  )
+)
+
+print(contrasts)
+```
+
+
+```{r}
+# Visualize
+ggplot(contrasts, aes(x = contrast, y = difference, fill = context)) +
+  geom_col(position = position_dodge(0.9)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    x = "Contrast",
+    y = "Difference in predicted probability",
+    fill = "Context",
+    title = "AI vs Human Response Sentiment"
+  ) +
+  theme_minimal()
+```
+
+Interpretation:
+If there is a positive difference = FT or GPT more positive than Human
+If there is a negative difference = FT or GPT more negative than Human
+Dashed line at 0 is the Human baseline
+Shows how much each AI differs from humans under negative vs positive context.
