@@ -62,9 +62,9 @@ Context: {row['Context']}
 # ------------- Running the functions ----------------
 # opens the CSV-file
 with open("/work/NLP2025/data/context_ID.csv", newline="", encoding="utf-8") as f:
-    reader = list(csv.DictReader(f)) # the file as a dictionary 
+    reader = list(csv.DictReader(f)) # read the file as a dictionary in a list to enable progression bars
     results = [] #creates empty list for results
-    #loop to go through each row, build the prompt, create response from GPT, save the output
+    # loop to go through each row, build the prompt, create response from GPT, save the output
     for row in tqdm(reader, desc="Generating GPT responses"):
         prompt = build_prompt(row)
         response = call_gpt(prompt)
