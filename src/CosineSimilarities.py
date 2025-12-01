@@ -27,9 +27,9 @@ import umap
 
 ''' Functions '''
 
-def compute_average_cosine_similarity(save_path, column_pairs):
+def compute_cosine_similarity(save_path, column_pairs):
     """
-    Compute averaged cosine similarity per column pairs e.g. context_1 v. human_response_context_1
+    Compute cosine similarity per column pairs e.g. context_1 v. human_response_context_1
 
     Args:
         save_path (str): folder where .npy embeddings are stored
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     # --- On topic Analysis ---
 
     # Compute average cosine similarities
-    avg_cos_sim, rowwise_sims = compute_average_cosine_similarity(save_path, column_pairs = column_pairs_topic)
+    avg_cos_sim, rowwise_sims = compute_cosine_similarity(save_path, column_pairs = column_pairs_topic)
     print("Average Cosine Similarities:", avg_cos_sim)
 
     # Plot mean embeddings after Umap
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     # --- Human-Likeness Analysis ---
     
     # Compute average cosine similarities
-    avg_cos_sim, rowwise_sims = compute_average_cosine_similarity(save_path, column_pairs = column_pairs_human)
+    avg_cos_sim, rowwise_sims = compute_cosine_similarity(save_path, column_pairs = column_pairs_human)
     print("Average Cosine Similarities:", avg_cos_sim)
 
     # Plot mean embeddings after Umap
