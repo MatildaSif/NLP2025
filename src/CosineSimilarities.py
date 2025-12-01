@@ -60,7 +60,7 @@ def compute_average_cosine_similarity(save_path, column_pairs):
 
 def plot_mean_embeddings(save_path, columns, output_path, filename):
     """
-    Plot mean embeddings as 2D points after PCA.
+    Plot mean embeddings as 2D points after UMAP.
 
     Args:
         save_path (str): folder where .npy embeddings are stored
