@@ -13,3 +13,5 @@ spacy
 transformers==4.57.3
 accelerate
 umap-learn
+together
+anthropic
