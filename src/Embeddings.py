@@ -40,7 +40,7 @@ def merge_dfs(dfs, files_path):
     
     final_df = reduce(lambda left, right: pd.merge(left, right, on=["Context", "ID"], how="inner"), dfs)
 
-    final_df = final_df[["ID","Context","Human_response", "FT_response", "GPT_response"]]
+    final_df = final_df[["ID","Context","Human_response", "FT_response", "GPT_response", "topic"]]
     # Make ID first column
     cols = final_df.columns.tolist()
     cols.insert(0, cols.pop(cols.index("ID")))

@@ -10,18 +10,8 @@ import argparse
 from pathlib import Path
 import warnings
 # Get the API key from the environment variable
-def get_api_key():
-    api_key = os.getenv("OPENAI_API_KEY")
-    if api_key is None:
-        try:
-            with open('key.txt','r') as f:
-                api_key = [line.rstrip('\n') for line in f][0]
-        except:
-            raise EnvironmentError("OPENAI_API_KEY environment variable is not set and no key.txt file to read API key found.")
-    return api_key
-
-api_key = get_api_key()
-client = OpenAI(api_key=api_key)
+from openai import OpenAI
+client = OpenAI()  # SDK now reads OPENAI_API_KEY from environment
 
 def create_prompt(row, metric, prompt_col="question", response_col="response"):
     if metric == 'validation':

@@ -29,7 +29,7 @@ if __name__ == "__main__":
     data = pd.read_csv("data/Original_Human_responses.csv")
 
     #Select important columns
-    data = data[["questionID","questionTitle", "questionText","answerText", "upvotes"]]
+    data = data[["questionID","questionTitle", "questionText","answerText", "upvotes", "topic"]]
 
     # combine text and title to one column for prompting
     data["questionText"] = data["questionTitle"].fillna("").astype(str) + ". " + data["questionText"].fillna("").astype(str)
