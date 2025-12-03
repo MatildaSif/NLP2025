@@ -152,7 +152,7 @@ def generate_ai_response_for_row(
     prompt_col,
     response_col,
     metrics=("validation", "indirectness", "framing"),
-    model="gpt-4o",
+    model = "gpt-4o-mini",
     max_tokens=2,
 ):
     """
