@@ -12,7 +12,8 @@ python elephant/sycophancy_scorers.py \
   --response_column Human_response \
   --output_column_tag Human_sychophancy \
   --output_file data/Human_validation.csv \
-  --validation --indirectness --framing
+  --validation --indirectness --framing \
+  --save_interval 10
 
 python elephant/sycophancy_scorers.py \
   --input_file data/FT_responses.csv \
@@ -20,7 +21,8 @@ python elephant/sycophancy_scorers.py \
   --response_column FT_response \
   --output_column_tag FT_sychophancy \
   --output_file data/FT_validation.csv \
-  --validation --indirectness --framing
+  --validation --indirectness --framing \
+  --save_interval 10
 
   python elephant/sycophancy_scorers.py \
   --input_file data/GPT_responses.csv \
@@ -28,7 +30,8 @@ python elephant/sycophancy_scorers.py \
   --response_column GPT_response \
   --output_column_tag GPT_sychophancy \
   --output_file data/GPT_validation.csv \
-  --validation --indirectness --framing
+  --validation --indirectness --framing \
+  --save_interval 10
   
 # close the environment
 deactivate
