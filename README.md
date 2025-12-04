@@ -10,6 +10,36 @@ Create a txt-file called .env (with no file-type-name shown) and place it in the
 
 ORRRR Create a file named api_key.txt in the project folder and paste in your API key.
 
+## ELEPHANT
+- you need a key.txt file at the NLP2025 level with your API key that begins with sk-proj-
+- To run the sycophancy_scorer.py script for all our context-pair responses use the following layout in the run.sh script for the python run section:
+python elephant/sycophancy_scorers.py \
+  --input_file data/Human_responses.csv \
+  --prompt_column Context \
+  --response_column Human_response \
+  --output_column_tag Human_sychophancy \
+  --output_file data/Human_validation.csv \
+  --validation --indirectness --framing \
+  --save_interval 10
+
+python elephant/sycophancy_scorers.py \
+  --input_file data/FT_responses.csv \
+  --prompt_column Context \
+  --response_column FT_response \
+  --output_column_tag FT_sychophancy \
+  --output_file data/FT_validation.csv \
+  --validation --indirectness --framing \
+  --save_interval 10
+
+  python elephant/sycophancy_scorers.py \
+  --input_file data/GPT_responses.csv \
+  --prompt_column Context \
+  --response_column GPT_response \
+  --output_column_tag GPT_sychophancy \
+  --output_file data/GPT_validation.csv \
+  --validation --indirectness --framing \
+  --save_interval 10
+
 ### Have access to GPUs
 In order to run Finetuned_LLM_response.py you need GPUs. It take a long time so be patient. 
 
