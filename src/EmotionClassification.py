@@ -59,6 +59,7 @@ def emotion_vector(score_dict):
     """Convert dict of label:score into a fixed vector matching emotion_labels."""
     return np.array([score_dict.get(e, 0) for e in emotion_labels])
 
+# function that computes how emotionally similar responses are to the client’s emotion in the same row.
 def emotional_alignment(row, col):
     """Compute emotional similarity between context and a response."""
     ctx_vec = emotion_vector(row["Context_emotion"])
