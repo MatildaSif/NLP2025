@@ -23,6 +23,7 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 import pandas as pd
 import umap
+from scipy import stats
 
 
 
@@ -342,7 +343,91 @@ def plot_topic_comparison(rowwise_sims, topics, output_path, filename):
         print(f"Topic comparison for '{pair}' saved to: {save_file}")
 
 
+from scipy import stats
 
+def calculate_similarity_stats(rowwise_sims, topics=None):
+    """
+    Calculate mean, SD, and 95% confidence intervals for cosine similarities.
+    
+    Args:
+        rowwise_sims (dict): dictionary with row-wise cosine similarities
+        topics (np.array): optional array of topics for per-topic statistics
+    
+    Returns:
+        tuple: (overall_stats_df, topic_stats_df) or (overall_stats_df, None)
+    """
+    
+    # Helper function to calculate stats
+    def compute_stats(data):
+        n = len(data)
+        mean = np.mean(data)
+        sd = np.std(data, ddof=1)
+        se = stats.sem(data)
+        ci = stats.t.interval(0.95, n-1, loc=mean, scale=se)
+        
+        return {
+            'n': n,
+            'mean': mean,
+            'sd': sd,
+            'ci_lower': ci[0],
+            'ci_upper': ci[1]
+        }
+    
+    # Overall statistics
+    overall_data = []
+    for name, sims in rowwise_sims.items():
+        stat_dict = compute_stats(sims)
+        stat_dict['pair'] = name
+        overall_data.append(stat_dict)
+    
+    overall_stats_df = pd.DataFrame(overall_data)
+    overall_stats_df = overall_stats_df[['pair', 'n', 'mean', 'sd', 'ci_lower', 'ci_upper']]
+    
+    # Per-topic statistics
+    if topics is not None:
+        topic_data = []
+        unique_topics = np.unique(topics[~pd.isna(topics)])
+        
+        for topic in unique_topics:
+            topic_mask = topics == topic
+            for name, sims in rowwise_sims.items():
+                topic_sims = sims[topic_mask]
+                if len(topic_sims) > 0:
+                    stat_dict = compute_stats(topic_sims)
+                    stat_dict['pair'] = name
+                    stat_dict['topic'] = topic
+                    topic_data.append(stat_dict)
+        
+        topic_stats_df = pd.DataFrame(topic_data)
+        topic_stats_df = topic_stats_df[['topic', 'pair', 'n', 'mean', 'sd', 'ci_lower', 'ci_upper']]
+        
+        return overall_stats_df, topic_stats_df
+    
+    return overall_stats_df, None
+
+
+def save_statistics(overall_stats, topic_stats, output_path, prefix):
+    """
+    Save statistics to CSV files.
+    
+    Args:
+        overall_stats (pd.DataFrame): overall statistics dataframe
+        topic_stats (pd.DataFrame): per-topic statistics dataframe (can be None)
+        output_path (str): folder where files should be saved
+        prefix (str): prefix for filename (e.g., 'Topic' or 'Human')
+    """
+    os.makedirs(output_path, exist_ok=True)
+    
+    # Save overall statistics
+    overall_file = os.path.join(output_path, f"{prefix}_overall_statistics.csv")
+    overall_stats.to_csv(overall_file, index=False)
+    print(f"Overall statistics saved to: {overall_file}")
+    
+    # Save per-topic statistics
+    if topic_stats is not None:
+        topic_file = os.path.join(output_path, f"{prefix}_topic_statistics.csv")
+        topic_stats.to_csv(topic_file, index=False)
+        print(f"Per-topic statistics saved to: {topic_file}")
 
 
 ''' Define Parameters '''
@@ -397,6 +482,12 @@ if __name__ == "__main__":
     # Topic comparison plots
     plot_topic_comparison(rowwise_sims, topics, output_path, filename="Topic_comparison_boxplot.png")
 
+    # Calculate and save statistics
+    print("\nCalculating statistics for on-topic analysis...")
+    overall_stats, topic_stats = calculate_similarity_stats(rowwise_sims, topics)
+    save_statistics(overall_stats, topic_stats, output_path, prefix="Topic")
+    print("\nOn-topic statistics summary:")
+    print(overall_stats)
 
 
     # --- Human-Likeness Analysis ---
@@ -421,5 +512,12 @@ if __name__ == "__main__":
     
     # Topic comparison plots
     plot_topic_comparison(rowwise_sims, topics, output_path, filename="Human_comparison_boxplot.png")
-    
-    print("\nAll plots generated successfully!")
+
+    # Calculate and save statistics
+    print("\nCalculating statistics for human-likeness analysis...")
+    overall_stats, topic_stats = calculate_similarity_stats(rowwise_sims, topics)
+    save_statistics(overall_stats, topic_stats, output_path, prefix="Human")
+    print("\nHuman-likeness statistics summary:")
+    print(overall_stats)
+
+    print("\nAll plots and statistics generated successfully!")
