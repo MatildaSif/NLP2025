@@ -21,6 +21,10 @@ What the script does:
 3. Produced both per-row analysis files and aggregated summary statistics. 
 4. Saves a lexical summary file for reporting. 
 
+Input: final_df.csv  
+Intermediate output: lexical_analysis.csv
+Final output: lexical_summary.csv
+
 """
 
 ''' -------------------- Setup -------------------- '''
