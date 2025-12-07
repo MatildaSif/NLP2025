@@ -1,4 +1,19 @@
 # --------- API - GENERIC LLM RESPONSE GENERATION ------------
+"""
+This script generates GPT-based responses for a set of textual contexts stored
+in a CSV-file. Each context is sent individually to the OpenAI API, and the
+resulting model-generated responses are saved to a new CSV-file for later
+analysis and comparison with human and fine-tuned model outputs.
+
+What the script does
+1. Loads an OpenAI API key from a local text-file (api_key.txt).
+2. Performs a sanity check to confirm API is working.
+3. Lists available OpenAI models.
+4. Reads context data (ID + Context) from a CSV-file.
+5. Builds standalone prompts for each row.
+6. Sends each prompt to the specified GPT model.
+7. Stores the generated responses in a new output CSV-file.
+"""
 
 
 # --------- Setup ----------
@@ -20,13 +35,6 @@ def load_api_key():
 API_KEY = load_api_key()
 
 client = OpenAI(api_key=API_KEY)
-
-
-#note that you have to have a .env file with the API key for producing generic LLM responses
-#load_dotenv()  # reads .env file automatically 
-
-# Retrieves the API key and creates the client that we will use to send prompts to GPT models
-#client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ------------ TEST and model availability list------------
 # sanity check to figure out whether API key works
