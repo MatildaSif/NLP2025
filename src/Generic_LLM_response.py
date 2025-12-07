@@ -13,6 +13,10 @@ What the script does
 5. Builds standalone prompts for each row.
 6. Sends each prompt to the specified GPT model.
 7. Stores the generated responses in a new output CSV-file.
+
+Input: context_ID.csv 
+Output: GPT_responses.csv
+
 """
 
 
