@@ -304,47 +304,6 @@ def plot_heatmap(rowwise_sims, output_path, filename, topics=None):
     print(f"Heatmap saved to: {save_file}")
 
 
-def plot_topic_comparison(rowwise_sims, topics, output_path, filename):
-    """
-    Plot box plots comparing cosine similarities across topics.
-    
-    Args:
-        rowwise_sims (dict): dictionary with row-wise cosine similarities
-        topics (np.array): array of topics
-        output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-    """
-    os.makedirs(output_path, exist_ok=True)
-    
-    # Convert to long-format dataframe with topics
-    data = []
-    for name, sims in rowwise_sims.items():
-        for idx, val in enumerate(sims):
-            if not pd.isna(topics[idx]):
-                data.append({"pair": name, "similarity": val, "topic": topics[idx]})
-    df = pd.DataFrame(data)
-    
-    # Create plot for each column pair
-    for pair in df['pair'].unique():
-        pair_data = df[df['pair'] == pair]
-        
-        plt.figure(figsize=(10,6))
-        sns.boxplot(x="topic", y="similarity", data=pair_data)
-        plt.title(f"Cosine Similarity Across Topics - {pair}")
-        plt.ylabel("Cosine Similarity")
-        plt.xlabel("Topic")
-        plt.xticks(rotation=45, ha='right')
-        plt.tight_layout()
-        
-        safe_pair = pair.replace('-', '_')
-        save_file = os.path.join(output_path, f"{filename.replace('.png', '')}_{safe_pair}.png")
-        plt.savefig(save_file)
-        plt.close()
-        print(f"Topic comparison for '{pair}' saved to: {save_file}")
-
-
-from scipy import stats
-
 def calculate_similarity_stats(rowwise_sims, topics=None):
     """
     Calculate mean, SD, and 95% confidence intervals for cosine similarities.
@@ -479,9 +438,6 @@ if __name__ == "__main__":
     plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde_by_topic.png", topics=topics)
     plot_violin(rowwise_sims, output_path, filename ="Topic_cosine_similarity_violin_by_topic.png", topics=topics)
     
-    # Topic comparison plots
-    plot_topic_comparison(rowwise_sims, topics, output_path, filename="Topic_comparison_boxplot.png")
-
     # Calculate and save statistics
     print("\nCalculating statistics for on-topic analysis...")
     overall_stats, topic_stats = calculate_similarity_stats(rowwise_sims, topics)
@@ -509,9 +465,6 @@ if __name__ == "__main__":
     print("\nGenerating per-topic plots for human-likeness analysis...")
     plot_kde(rowwise_sims, output_path, filename ="Human_cosine_similarity_kde_by_topic.png", topics=topics)
     plot_violin(rowwise_sims, output_path, filename ="Human_cosine_similarity_violin_by_topic.png", topics=topics)
-    
-    # Topic comparison plots
-    plot_topic_comparison(rowwise_sims, topics, output_path, filename="Human_comparison_boxplot.png")
 
     # Calculate and save statistics
     print("\nCalculating statistics for human-likeness analysis...")
