@@ -78,52 +78,19 @@ def compute_cosine_similarity(save_path, column_pairs):
     return avg_cos_sim, rowwise_sims # also get row-wise sim for later plotting
 
 
-
-def plot_mean_embeddings(save_path, columns, output_path, filename):
+def get_color_mapping():
     """
-    Plot mean embeddings as 2D points after UMAP.
-
-    Args:
-        save_path (str): folder where .npy embeddings are stored
-        columns (str): list of columns that will a mean will be calculated for
-        output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-    """
-    # Ensure save directory exists
-    os.makedirs(output_path, exist_ok=True)
-
-    # get mean embeddings of each column
-    mean_embeds = {}
-    for col in columns:
-        X = np.load(os.path.join(save_path, f"emb-{col}.npy"))
-        mean_embeds[col] = X.mean(axis=0)
-
-    labels = list(mean_embeds.keys())
-    X_mean = np.stack(list(mean_embeds.values()))
-
-    # Umap to 2D
-    n_neighbors = min(15, len(X_mean) - 1)
-    reducer = umap.UMAP(n_components=2, n_neighbors=n_neighbors)    
-    X_2d = reducer.fit_transform(X_mean)
-
-    # Plot points
-    plt.figure(figsize=(6,6))
-    plt.scatter(X_2d[:,0], X_2d[:,1], color=["blue","green","orange","red"], s=100)
-
-    # Add labels
-    for i, label in enumerate(labels):
-        plt.text(X_2d[i,0]+0.01, X_2d[i,1]+0.01, label, fontsize=12)
-
-    plt.title("Mean Embeddings Projected to 2D (UMAP)")
-    plt.xlabel("UMAP-1")
-    plt.ylabel("UMAP-2")
-    plt.grid(True)
+    Define color mapping for different comparison pairs.
     
-    save_file = os.path.join(output_path, filename)
-    plt.savefig(save_file)
-    plt.close()
-    print(f"Mean Embeddings Projected plot saved to: {save_file}")
-
+    Returns:
+        dict: mapping of pair names to hex colors
+    """
+    color_map = {
+        "context-human_response": "#5396c5",  # blue
+        "context-ft_response": "#ff9c47",     # orange
+        "context-gpt_response": "#69bc69"    # green
+    }
+    return color_map
 
 
 def plot_kde(rowwise_sims, output_path, filename, topics=None):
@@ -137,12 +104,14 @@ def plot_kde(rowwise_sims, output_path, filename, topics=None):
         topics (np.array): optional array of topics for per-topic plots
     """
     os.makedirs(output_path, exist_ok=True)
+    color_map = get_color_mapping()
 
     if topics is None:
         # Overall plot
         plt.figure(figsize=(8,5))
         for name, sims in rowwise_sims.items():
-            sns.kdeplot(sims, label=name, fill=True, alpha=0.4)
+            color = color_map.get(name, "#000000")  # Default to black if not found
+            sns.kdeplot(sims, label=name, fill=True, alpha=0.5, color=color)
         plt.xlabel("Cosine Similarity")
         plt.ylabel("Density")
         plt.title("Row-wise Cosine Similarity Distribution (KDE)")
@@ -174,7 +143,8 @@ def plot_kde(rowwise_sims, output_path, filename, topics=None):
             for name, sims in rowwise_sims.items():
                 topic_sims = sims[topic_mask]
                 if len(topic_sims) > 0:
-                    sns.kdeplot(topic_sims, label=name, fill=True, alpha=0.4, ax=ax)
+                    color = color_map.get(name, "#000000")
+                    sns.kdeplot(topic_sims, label=name, fill=True, alpha=0.5, color=color, ax=ax)
             
             ax.set_xlabel("Cosine Similarity")
             ax.set_ylabel("Density")
@@ -192,116 +162,6 @@ def plot_kde(rowwise_sims, output_path, filename, topics=None):
         plt.savefig(save_file, bbox_inches='tight')
         plt.close()
         print(f"Faceted KDE plot saved to: {save_file}")
-
-
-def plot_violin(rowwise_sims, output_path, filename, topics=None):
-    """
-    Plot violin plot of row-wise cosine similarities per column pair.
-
-    Args:
-        rowwise_sims (dict): dictionary with row-wise cosine similarities
-        output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-        topics (np.array): optional array of topics for per-topic plots
-    """
-    os.makedirs(output_path, exist_ok=True)
-
-    if topics is None:
-        # Overall plot
-        data = []
-        for name, sims in rowwise_sims.items():
-            for val in sims:
-                data.append({"pair": name, "similarity": val})
-        df = pd.DataFrame(data)
-
-        plt.figure(figsize=(8,5))
-        sns.violinplot(x="pair", y="similarity", data=df, inner="quartile")
-        plt.title("Row-wise Cosine Similarity per Column Pair (Violin Plot)")
-        plt.ylabel("Cosine Similarity")
-        plt.xlabel("Column Pair")
-        plt.xticks(rotation=30)
-        plt.tight_layout()
-
-        save_file = os.path.join(output_path, filename)
-        plt.savefig(save_file)
-        plt.close()
-        print(f"Violin plot saved to: {save_file}")
-    else:
-        # Per-topic faceted plot
-        unique_topics = np.unique(topics[~pd.isna(topics)])
-        n_topics = len(unique_topics)
-        
-        # Calculate grid dimensions
-        n_cols = min(3, n_topics)
-        n_rows = int(np.ceil(n_topics / n_cols))
-        
-        fig, axes = plt.subplots(n_rows, n_cols, figsize=(6*n_cols, 5*n_rows))
-        if n_topics == 1:
-            axes = np.array([axes])
-        axes = axes.flatten()
-        
-        for idx, topic in enumerate(unique_topics):
-            topic_mask = topics == topic
-            ax = axes[idx]
-            
-            data = []
-            for name, sims in rowwise_sims.items():
-                topic_sims = sims[topic_mask]
-                for val in topic_sims:
-                    data.append({"pair": name, "similarity": val})
-            df = pd.DataFrame(data)
-
-            if len(df) > 0:
-                sns.violinplot(x="pair", y="similarity", data=df, inner="quartile", ax=ax)
-                ax.set_title(f"Topic: {topic}")
-                ax.set_ylabel("Cosine Similarity")
-                ax.set_xlabel("Column Pair")
-                ax.tick_params(axis='x', rotation=30)
-        
-        # Hide unused subplots
-        for idx in range(n_topics, len(axes)):
-            axes[idx].axis('off')
-        
-        plt.suptitle("Cosine Similarity per Column Pair by Topic", fontsize=16, y=1.00)
-        plt.tight_layout()
-
-        save_file = os.path.join(output_path, filename)
-        plt.savefig(save_file, bbox_inches='tight')
-        plt.close()
-        print(f"Faceted violin plot saved to: {save_file}")
-
-
-def plot_heatmap(rowwise_sims, output_path, filename, topics=None):
-    """
-    Plot heatmap of row-wise cosine similarities.
-
-    Args:
-        rowwise_sims (dict): dictionary with row-wise cosine similarities
-        output_path (str): folder where plots should be saved
-        filename (str): Name of file to be saved
-        topics (np.array): optional array of topics for sorting
-    """
-    os.makedirs(output_path, exist_ok=True)
-
-    sims_matrix = np.stack(list(rowwise_sims.values()), axis=1)  # shape: (n_rows, n_pairs)
-    labels = list(rowwise_sims.keys())
-
-    if topics is not None:
-        # Sort by topic for better visualization
-        sort_idx = np.argsort(topics)
-        sims_matrix = sims_matrix[sort_idx, :]
-
-    plt.figure(figsize=(10,6))
-    sns.heatmap(sims_matrix, cmap="viridis", yticklabels=False, xticklabels=labels)
-    plt.title("Row-wise Cosine Similarity Heatmap")
-    plt.xlabel("Column Pair")
-    plt.ylabel("Context Index (sorted by topic)" if topics is not None else "Context Index")
-    plt.tight_layout()
-
-    save_file = os.path.join(output_path, filename)
-    plt.savefig(save_file)
-    plt.close()
-    print(f"Heatmap saved to: {save_file}")
 
 
 def calculate_similarity_stats(rowwise_sims, topics=None):
@@ -400,11 +260,6 @@ column_pairs_topic = [
     ("context", "ft_response"),
     ("context", "gpt_response")
 ]
-column_pairs_human = [
-    ("ft_response", "gpt_response"),
-    ("human_response", "ft_response"),
-    ("human_response", "gpt_response")
-]
 
 
 ''' Main '''
@@ -423,20 +278,13 @@ if __name__ == "__main__":
     # Compute average cosine similarities
     avg_cos_sim, rowwise_sims = compute_cosine_similarity(save_path, column_pairs = column_pairs_topic)
     print("Average Cosine Similarities:", avg_cos_sim)
-
-    # Plot mean embeddings after Umap
-    columns = ["context", "human_response", "ft_response", "gpt_response"]
-    plot_mean_embeddings(save_path, columns, output_path, filename = "Topic_mean_embeddings_UMAP.png")
     
     # Overall plots
     plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde.png")
-    plot_violin(rowwise_sims, output_path, filename ="Topic_cosine_similarity_violin.png")
-    plot_heatmap(rowwise_sims, output_path, filename ="Topic_cosine_similarity_heatmap.png", topics=topics)
-    
+
     # Per-topic plots
     print("\nGenerating per-topic plots for on-topic analysis...")
     plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde_by_topic.png", topics=topics)
-    plot_violin(rowwise_sims, output_path, filename ="Topic_cosine_similarity_violin_by_topic.png", topics=topics)
     
     # Calculate and save statistics
     print("\nCalculating statistics for on-topic analysis...")
@@ -444,33 +292,3 @@ if __name__ == "__main__":
     save_statistics(overall_stats, topic_stats, output_path, prefix="Topic")
     print("\nOn-topic statistics summary:")
     print(overall_stats)
-
-
-    # --- Human-Likeness Analysis ---
-    
-    # Compute average cosine similarities
-    avg_cos_sim, rowwise_sims = compute_cosine_similarity(save_path, column_pairs = column_pairs_human)
-    print("\nAverage Cosine Similarities:", avg_cos_sim)
-
-    # Plot mean embeddings after Umap
-    columns = ["context", "human_response", "ft_response", "gpt_response"]
-    plot_mean_embeddings(save_path, columns, output_path, filename = "Mean_embeddings_UMAP.png")
-
-    # Overall plots
-    plot_kde(rowwise_sims, output_path, filename ="Human_cosine_similarity_kde.png")
-    plot_violin(rowwise_sims, output_path, filename ="Human_cosine_similarity_violin.png")
-    plot_heatmap(rowwise_sims, output_path, filename ="Human_cosine_similarity_heatmap.png", topics=topics)
-    
-    # Per-topic plots
-    print("\nGenerating per-topic plots for human-likeness analysis...")
-    plot_kde(rowwise_sims, output_path, filename ="Human_cosine_similarity_kde_by_topic.png", topics=topics)
-    plot_violin(rowwise_sims, output_path, filename ="Human_cosine_similarity_violin_by_topic.png", topics=topics)
-
-    # Calculate and save statistics
-    print("\nCalculating statistics for human-likeness analysis...")
-    overall_stats, topic_stats = calculate_similarity_stats(rowwise_sims, topics)
-    save_statistics(overall_stats, topic_stats, output_path, prefix="Human")
-    print("\nHuman-likeness statistics summary:")
-    print(overall_stats)
-
-    print("\nAll plots and statistics generated successfully!")

@@ -38,6 +38,21 @@ sns.set_style("ticks", {
 
 # ------------------------ Functions ------------------------
 
+def get_color_mapping():
+    """
+    Define color mapping for different models.
+    
+    Returns:
+        dict: mapping of model names to hex colors
+    """
+    color_map = {
+        "Human_sychophancy": "#5396c5",  # blue
+        "FT_sychophancy": "#ff9c47",     # orange
+        "GPT_sychophancy": "#69bc69"     # green
+    }
+    return color_map
+
+
 def merge_dfs(dfs, files_path):
     """
     Merge multiple DataFrames on 'Context'.
@@ -109,6 +124,9 @@ def main():
     print(f"\nMetrics saved to output/elephant_metrics_results.csv")
     print(f"Rows saved: {len(plot_df)}")
 
+    # Get color mapping
+    color_map = get_color_mapping()
+    
     # Create grouped bar plot
     metrics = ['validation', 'indirectness', 'framing']
     models = plot_df['model'].unique()
@@ -122,6 +140,9 @@ def main():
         print(i)
         model_df = plot_df[plot_df['model'] == model].set_index('metric').loc[metrics]
         
+        # Get color for this model
+        color = color_map.get(model, "#000000")  # Default to black if not found
+        
         hatch = '\\' if i == 0 else None
         ax.bar(
             x + i * width,
@@ -129,7 +150,8 @@ def main():
             width,
             yerr=model_df['CI'],
             label=model,
-            hatch=hatch
+            hatch=hatch,
+            color=color
         )
     
     apply_style(ax)
@@ -214,4 +236,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
