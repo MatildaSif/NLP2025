@@ -1,14 +1,37 @@
 """
-EMOTION CLASSIFICATION
-This script investigates whether responses are emotionally aligned with 
-the client's emotional state.
+----------------------- EMOTION CLASSIFICATION ------------------------
+This script performs an emotion classification and emotional-alignment analysis
+on the final merged dataset (final_df.csv). It uses a pretrained Hugging Face
+emotion classification model to extract emotion profiles for each text segment
+(Context, Human response, GPT response, and Fine-tuned model response), and then
+computes how closely each response aligns with the emotional profile of the
+context.
 
-For each row, it computes the emotion for both context and all response types.
-Emotional coherence is computed as a continuous measure via cosine similarity.
+What the script does:
+1. Loads the dataset containing Context, Human_response, GPT_response,
+   and FT_response.
+2. Uses the DistilRoBERTa-based model
+   "j-hartmann/emotion-english-distilroberta-base" to compute these emotion scores
+   (anger, disgust, fear, joy, neutral, sadness, surprise) for each text.
+3. Converts emotion-score dictionaries into fixed emotion vectors.
+4. Computes emotional similarity between the Context and each response using
+   cosine similarity.
+5. Appends these emotion vectors and similarity scores to the df.
+6. Saves a output file containing only:
+   - ID
+   - Emotion score dictionaries for each text type
+   - Emotional similarity scores (Context vs. Human, FT, GPT)
+
+Input:
+- final_df.csv  
+
+Output:
+- emotion_analysis.csv  
+
 """
 
 
-''' SETUP '''
+''' ------------------------- SETUP --------------------------- '''
 # load packages
 import pandas as pd
 import numpy as np

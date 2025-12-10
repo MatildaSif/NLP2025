@@ -27,44 +27,45 @@ Final output: lexical_summary.csv
 
 """
 
+
 ''' -------------------- Setup -------------------- '''
 
-# loading packages
+# Load required packages
 import spacy
 import pandas as pd
 import numpy as np
 import math
 from tqdm import tqdm
 
-#load spaCy model
+# Load spaCy English model (used for tokenization, sentences, etc.)
 nlp = spacy.load("en_core_web_sm")
 
-# enable progression bars
+# Enable progress bars for pandas .apply()
 tqdm.pandas()
 
-# Paths
+# Input and output paths
 FINAL_DF_PATH = "/work/NLP2025/data/final_df.csv"
 LEXICAL_ANALYSIS_PATH = "/work/NLP2025/data/lexical_analysis.csv"
 LEXICAL_SUMMARY_PATH = "/work/NLP2025/output/lexical_summary.csv"
 
-# Read file 
+# Load the merged dataset
 df = pd.read_csv(FINAL_DF_PATH)
 
-# columns to be analyzed
+# Columns for lexical analysis
 TEXT_COLS = ["Context", "Human_response", "FT_response", "GPT_response"]
 
 
 ''' ---------------------------- Defining functions -----------------------------'''
 
-# --- word counting function ---
+# --- Word count ---
 def spacy_word_count(text):
-    """Return number of alphabetic tokens (words) in the text using spaCy."""
+    """Count alphabetic tokens using spaCy (ignores punctuation, numbers, etc.)."""
     if not isinstance(text, str) or text.strip() == "":
         return 0
     doc = nlp(text)
     return sum(1 for token in doc if token.is_alpha)
 
-# --- Total number of sentences ---
+# --- Sentence count ---
 def sentence_count(text):
     """Return number of sentences detected by spaCy."""
     if not isinstance(text, str) or text.strip() == "":
@@ -72,9 +73,9 @@ def sentence_count(text):
     doc = nlp(text)
     return len(list(doc.sents))
 
-# --- Calculate average sentence length (i.e. words per sentence) ---
+# --- Average sentence length (words per sentence) ---
 def avg_sentence_length(text):
-    """Return avg words per sentence using spaCy alphabetic tokens."""
+    """Compute average words per sentence using alphabetic tokens only."""
     if not isinstance(text, str) or text.strip() == "":
         return 0
     doc = nlp(text)
@@ -86,94 +87,88 @@ def avg_sentence_length(text):
     total_words = sum(len([t for t in sent if t.is_alpha]) for sent in sentences)
     return total_words / len(sentences)
 
-# ---- Type-Token Ratio (TTR) → Unique words / total words -----
-# Define function using spaCy
+# ---- Type–Token Ratio (TTR) ----
 def ttr_spacy(text):
-    """Compute Type-Token Ratio for a text using spaCy alphabetic tokens."""
+    """Compute Type-Token Ratio: unique words / total words (lowercased)."""
     if not isinstance(text, str) or text.strip() == "":
         return 0
-    
-    doc = nlp(text.lower())  # lowercase so 'Hello' and 'hello' count as same type
+    doc = nlp(text.lower()) # lowercase so 'Hello' and 'hello' count as the same type
     tokens = [t.text for t in doc if t.is_alpha]
-
     if len(tokens) == 0:
         return 0
-    
     return len(set(tokens)) / len(tokens)
 
-
-# --- Corrected TTR (CTTR) ---
+# ---- Corrected TTR (CTTR) ----
 def cttr_spacy(text):
     """
-    Compute Corrected Type-Token Ratio (CTTR) using spaCy.
-    CTTR = types / sqrt(2 * tokens)
+    Compute Corrected Type-Token Ratio:
+        CTTR = types / sqrt(2 * tokens)
+    This normalizes TTR to make it less sensitive to text length.
     """
     if not isinstance(text, str) or text.strip() == "":
         return 0.0
-    
     doc = nlp(text.lower())
-    tokens = [t.text for t in doc if t.is_alpha]  # alphabetic "words" only
-    
+    tokens = [t.text for t in doc if t.is_alpha] # alphabetic "words" only
     n_tokens = len(tokens)
     if n_tokens == 0:
         return 0.0
-    
     n_types = len(set(tokens))
     return n_types / math.sqrt(2 * n_tokens)
 
-
-# ---- MTLD helper functions -----
+# ---- MTLD helper functions: this computes MTLD for one direction of text ----
 def mtld_calc(tokens, ttr_threshold=0.72, min_segment=10):
     """
-    Compute MTLD for a list of tokens.
-    Based on the standard algorithm: segments until TTR drops below threshold.
+    Compute MTLD (Measure of Textual Lexical Diversity) for a token sequence.
+    Based on the standard algortihm: thus, it segments the text whenever TTR falls below the threshold.
+    THUS, Longer segments → higher lexical diversity.
+
     """
     if len(tokens) == 0:
         return 0.0
-    
+
     factors = 0
     types = set()
     token_count = 0
-    
+
     for tok in tokens:
         token_count += 1
         types.add(tok)
         current_ttr = len(types) / token_count
-        
+
+        # Start a new segment when TTR falls below the threshold
         if token_count >= min_segment and current_ttr <= ttr_threshold:
             factors += 1
             types = set()
             token_count = 0
-    
-    # handle last partial segment
+
+    # Add partial final segment
     if token_count != 0:
         factors += (1 - (len(types) / token_count - ttr_threshold) /
                     (1 - ttr_threshold))
-    
+
     if factors == 0:
         return 0.0
-    
+
     return len(tokens) / factors
 
 
+# ---- MTLD using spaCy tokenization ----
 def mtld_spacy(text, ttr_threshold=0.72, min_segment=10):
     """
-    Compute MTLD for a text using spaCy tokenization.
-    Returns the average of forward and backward MTLD.
+    Compute MTLD using alphabetic tokens.
+    Returns the mean of forward and backward MTLD values.
     """
     if not isinstance(text, str) or text.strip() == "":
         return 0.0
-    
     doc = nlp(text.lower())
     tokens = [t.text for t in doc if t.is_alpha]
-    
     if len(tokens) == 0:
         return 0.0
-    
+
     mtld_forward = mtld_calc(tokens, ttr_threshold, min_segment)
     mtld_backward = mtld_calc(list(reversed(tokens)), ttr_threshold, min_segment)
-    
     return (mtld_forward + mtld_backward) / 2
+
 
 ''' ------------------------- Main -------------------------- '''
 if __name__ == "__main__":
