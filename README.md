@@ -80,60 +80,41 @@ computes row-wise cosine similarity and average cosine similarity for both on-to
 
 # Data Preparation
 DataCleaning.py
-
 Input: Original_Human_responses.csv
-
 Outputs:
-
-Human_responses.csv
-
-context_ID.csv
+- Human_responses.csv
+- context_ID.csv
 
 Generic_LLM_responses.py
-
 Input: context_ID.csv
-
 Requires: API_key.txt (user must create this file with their own API key)
-
 Output: GPT_responses.csv
 
 
 # Lexical Analysis
 Lexical_analysis.py
-
 Input: final_df.csv
-
 Intermediate Output: lexical_analysis.csv
-
 Final Output: lexical_summary.csv
 
 Lexical_plot.py
-
 Input: lexical_summary.csv
-
 Outputs:
-
-CTTR_density.png
-
-MTLD_density.png
+- CTTR_density.png
+- MTLD_density.png
 
 
 # Emotional Alignment Analysis
 EmotionClassification.py
-
 Input: final_df.csv
-
 Output: emotion_analysis.csv
 
 EmotionStats.py
-
 Input: emotion_analysis.csv
-
-Prints Wilcoxon test results in terminal
-
 Outputs:
+- Prints Wilcoxon test results in terminal
+- emotion_distribution.png
 
-emotion_distribution.png
 
 # Counsel Chat Copyright notice :))
 MIT License
