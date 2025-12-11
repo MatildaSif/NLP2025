@@ -16,6 +16,12 @@ This script does 2 things:
     - Remove the other responses for each context
     - Save cleaned CSV
 
+Input: Original_Human_responses.csv
+Outputs: 
+    - Human_responses.csv
+    - context_ID.csv
+
+
 """
 
 import pandas as pd

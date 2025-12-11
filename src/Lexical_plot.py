@@ -8,7 +8,10 @@ It is focused on the CTTR and MTLD. And for each metric, it plots one curve per 
 - Fine-tuned response
 
 These curves are approximated using the mean ± SD for each group.
+
+Input: lexical_summary.csv
 Output: PNG files saved to OUTPUT_DIR.
+
 '''
 
 ''' ------------------------------ SETUP ------------------------------- '''
@@ -25,6 +28,14 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Load the summary CSV - while excluding the label column
 df = pd.read_csv(SUMMARY_PATH, index_col=0)
+
+# Custom color palette
+colors = {
+    "Context": "#f05948",        # red
+    "Human response": "#5396c5",  # blue
+    "GPT response": "#69bc69",    # green
+    "FT response": "#ff9c47"     # orange
+}
 
 ''' ------------------ Making plot and stats summary functions -------------------'''
 def make_density_plot(metric_name, stats_type):
@@ -46,7 +57,9 @@ def make_density_plot(metric_name, stats_type):
         values = pd.Series([mean - sd, mean, mean + sd])
         sns.kdeplot(
             values,
-            label=f"{label} (Mean={mean:.2f}, SD={sd:.2f})"
+            label=f"{label} (Mean={mean:.2f}, SD={sd:.2f})",
+            color=colors[label],
+            linewidth=2
         )
 
     plt.title(f"Density Plot: {metric_name}")
