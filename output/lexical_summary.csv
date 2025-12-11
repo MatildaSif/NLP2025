@@ -11,10 +11,6 @@ FT_response_sentence_count,7.74,3.0,16.0,2.08
 FT_response_avg_sentence_length,20.77,7.12,56.67,6.87
 GPT_response_sentence_count,8.16,2.0,24.0,4.77
 GPT_response_avg_sentence_length,17.29,5.46,42.75,5.85
-Context_TTR,0.7,0.393,1.0,0.104
-Human_response_TTR,0.621,0.345,1.0,0.105
-FT_response_TTR,0.821,0.665,0.943,0.048
-GPT_response_TTR,0.741,0.589,0.892,0.051
 Context_CTTR,3.898,1.492,7.445,0.818
 Human_response_CTTR,5.342,2.121,9.618,1.007
 FT_response_CTTR,7.018,5.078,8.333,0.532

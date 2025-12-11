@@ -15,7 +15,6 @@ What the script does:
 - word count
 - Sentence count
 - Average sentence length 
-- Type-Token Ratio (TTR)
 - Corrected Type-Token Ratio (CTTR)
 - Measure of Textual Lexical Diversity (MTLD)
 3. Produced both per-row analysis files and aggregated summary statistics. 
@@ -86,17 +85,6 @@ def avg_sentence_length(text):
     # total number of words across sentences
     total_words = sum(len([t for t in sent if t.is_alpha]) for sent in sentences)
     return total_words / len(sentences)
-
-# ---- Type–Token Ratio (TTR) ----
-def ttr_spacy(text):
-    """Compute Type-Token Ratio: unique words / total words (lowercased)."""
-    if not isinstance(text, str) or text.strip() == "":
-        return 0
-    doc = nlp(text.lower()) # lowercase so 'Hello' and 'hello' count as the same type
-    tokens = [t.text for t in doc if t.is_alpha]
-    if len(tokens) == 0:
-        return 0
-    return len(set(tokens)) / len(tokens)
 
 # ---- Corrected TTR (CTTR) ----
 def cttr_spacy(text):
@@ -228,23 +216,6 @@ if __name__ == "__main__":
         col_min = lex[col].min()
         col_max = lex[col].max()
 
-    # ---------- Type-Token Ratio per row and summary ----------
-    ttr_df = pd.DataFrame()
-    ttr_df["ID"] = df["ID"]
-
-    for col in TEXT_COLS:
-        print(f"Computing TTR for: {col}")
-        ttr_df[f"{col}_TTR"] = df[col].progress_apply(ttr_spacy)
-
-    ttr_metrics = [col for col in ttr_df.columns if col.endswith("_TTR")]
-
-    ttr_summary = pd.DataFrame({
-        "Mean": ttr_df[ttr_metrics].mean(),
-        "Min": ttr_df[ttr_metrics].min(),
-        "Max": ttr_df[ttr_metrics].max(),
-        "SD": ttr_df[ttr_metrics].std()
-    }).round(3)
-
     # ---------- Corrected Type-Token Ratio per row and summary ----------
     cttr_df = pd.DataFrame()
     cttr_df["ID"] = df["ID"]
@@ -285,7 +256,7 @@ if __name__ == "__main__":
 
     # --------------- Combine into a single output dataframe ----------------
     lexical_summary = pd.concat(
-        [wordcount_summary, sentence_summary, ttr_summary, cttr_summary, mtld_summary],
+        [wordcount_summary, sentence_summary, cttr_summary, mtld_summary],
         axis=0
     )
 
