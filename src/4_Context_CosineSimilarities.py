@@ -1,14 +1,28 @@
 """
 On-topicness Analysis
 
-This script computes row-wise cosine similarity between contexts and multiple response types,
-and generates histogram and heatmap plots to visualize semantic alignment.
+This script evaluates semantic alignment between the context and responses
+(human, fine-tuned, GPT) by computing row-wise cosine similarity using precomputed embeddings.
 
-Goals:
-- Calculate mean embeddings and plot
-- Calculate average cosine similarities
-- Plot results
-- Analyze distributions per topic
+The aim of this analysis is to answer RQ2:
+RQ2: On-topicness
+How semantically aligned are model-generated responses with the context,
+compared to human therapist responses?
+
+What the script does:
+1. Loads topic labels from Human_responses.csv.
+2. Loads precomputed embeddings for context and responses.
+3. Computes row-wise cosine similarity for each pair: 
+   context-human, context-FT, context-GPT.
+4. Produces KDE plots to visualize overall and per-topic similarity distributions.
+5. Performs Wilcoxon signed-rank tests to compare similarity distributions between pairs.
+6. Calculates descriptive statistics (mean, SD, 95% CI) for overall and per-topic similarities.
+7. Saves plots, statistics CSVs, and Wilcoxon test results.
+
+Input: precomputed embeddings (.npy) and topic CSV (Human_responses.csv)
+Intermediate output: row-wise cosine similarity arrays
+Final output: KDE plots, overall and per-topic statistics CSVs, Wilcoxon test results CSV
+
 
 """
 
@@ -225,7 +239,7 @@ def calculate_similarity_stats(rowwise_sims, topics=None):
     return overall_stats_df, None
 
 
-def save_statistics(overall_stats, topic_stats, output_path, prefix):
+def save_statistics(overall_stats, topic_stats, output_path):
     """
     Save statistics to CSV files.
     
@@ -238,48 +252,56 @@ def save_statistics(overall_stats, topic_stats, output_path, prefix):
     os.makedirs(output_path, exist_ok=True)
     
     # Save overall statistics
-    overall_file = os.path.join(output_path, f"{prefix}_overall_statistics.csv")
+    overall_file = os.path.join(output_path, f"Context_Similarity_overall_statistics.csv")
     overall_stats.to_csv(overall_file, index=False)
     print(f"Overall statistics saved to: {overall_file}")
     
     # Save per-topic statistics
     if topic_stats is not None:
-        topic_file = os.path.join(output_path, f"{prefix}_topic_statistics.csv")
+        topic_file = os.path.join(output_path, f"Context_Similarity_topic_statistics.csv")
         topic_stats.to_csv(topic_file, index=False)
         print(f"Per-topic statistics saved to: {topic_file}")
 
 
-def run_wilcoxon(rowwise_sims):
+def run_wilcoxon(rowwise_sims, output_path):
     """
-    Run Wilcoxon signed-rank tests on the three cosine similarity arrays.
+    Run Wilcoxon signed-rank tests with Bonferroni correction for multiple comparisons.
     """
-
+    
     human = rowwise_sims["context-human_response"]
     ft = rowwise_sims["context-ft_response"]
     gpt = rowwise_sims["context-gpt_response"]
 
     # Perform paired Wilcoxon tests
-    w_human_gpt = stats.wilcoxon(human, gpt)
-    w_human_ft = stats.wilcoxon(human, ft)
-    w_ft_gpt = stats.wilcoxon(ft, gpt)
+    w_human_gpt = stats.wilcoxon(human, gpt, alternative='two-sided')
+    w_human_ft = stats.wilcoxon(human, ft, alternative='two-sided')
+    w_ft_gpt = stats.wilcoxon(ft, gpt, alternative='two-sided')
 
-    print("Human vs GPT:", w_human_gpt)
-    print("Human vs FT:", w_human_ft)
-    print("FT vs GPT:", w_ft_gpt)
+    # Apply Bonferroni correction (3 comparisons)
+    alpha = 0.05
+    bonferroni_alpha = alpha / 3
+    
+    print(f"\nWilcoxon Signed-Rank Tests (with Bonferroni correction α = {bonferroni_alpha:.4f}):")
+    print(f"Human vs GPT: W={w_human_gpt.statistic}, p={w_human_gpt.pvalue:.6f}")
+    print(f"Human vs FT: W={w_human_ft.statistic}, p={w_human_ft.pvalue:.6f}")
+    print(f"FT vs GPT: W={w_ft_gpt.statistic}, p={w_ft_gpt.pvalue:.6f}")
 
-   # Save to CSV
+    # Save to CSV with corrected p-values
     results_df = pd.DataFrame([
-        ["Human vs GPT", w_human_gpt.statistic, w_human_gpt.pvalue],
-        ["Human vs FT", w_human_ft.statistic, w_human_ft.pvalue],
-        ["FT vs GPT", w_ft_gpt.statistic, w_ft_gpt.pvalue]
-    ], columns=["comparison", "statistic", "p_value"])
+        ["Human vs GPT", w_human_gpt.statistic, w_human_gpt.pvalue, 
+         w_human_gpt.pvalue < bonferroni_alpha],
+        ["Human vs FT", w_human_ft.statistic, w_human_ft.pvalue,
+         w_human_ft.pvalue < bonferroni_alpha],
+        ["FT vs GPT", w_ft_gpt.statistic, w_ft_gpt.pvalue,
+         w_ft_gpt.pvalue < bonferroni_alpha]
+    ], columns=["comparison", "statistic", "p_value", "significant_bonferroni"])
 
     os.makedirs(output_path, exist_ok=True)
-    file_path = os.path.join(output_path, "wilcoxon_results.csv")
+    file_path = os.path.join(output_path, "Context_similarity_wilcoxon_results.csv")
     results_df.to_csv(file_path, index=False)
 
-    print(f"Wilcoxon results saved to: {file_path}")
-
+    print(f"\nWilcoxon results saved to: {file_path}")
+    
     return results_df
 
 
@@ -314,18 +336,18 @@ if __name__ == "__main__":
     print("Average Cosine Similarities:", avg_cos_sim)
 
     # Run statistical testing
-    wilcox_results = run_wilcoxon_simple(rowwise_sims)
+    wilcox_results = run_wilcoxon(rowwise_sims, output_path)
     
     # Overall plots
-    plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde.png")
+    plot_kde(rowwise_sims, output_path, filename ="Context_similarity_cosine_similarity_kde.png")
 
     # Per-topic plots
     print("\nGenerating per-topic plots for on-topic analysis...")
-    plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde_by_topic.png", topics=topics)
+    plot_kde(rowwise_sims, output_path, filename ="Context_similarity_cosine_similarity_kde_by_topic.png", topics=topics)
     
     # Calculate and save statistics
     print("\nCalculating statistics for on-topic analysis...")
     overall_stats, topic_stats = calculate_similarity_stats(rowwise_sims, topics)
-    save_statistics(overall_stats, topic_stats, output_path, prefix="Topic")
+    save_statistics(overall_stats, topic_stats, output_path)
     print("\nOn-topic statistics summary:")
     print(overall_stats)

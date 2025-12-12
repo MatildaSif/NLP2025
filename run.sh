@@ -1,12 +1,11 @@
 #!/usr/bin/bash
 
-export OPENAI_API_KEY=$(cat ./key.txt)
 
 # activate the environment
 source ./env/bin/activate
 
 # run the script
-python /src/Lexical_analysis.py
+python src/4_Context_CosineSimilarities.py
   
 # close the environment
 deactivate

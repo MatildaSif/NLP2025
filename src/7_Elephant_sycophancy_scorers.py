@@ -1,3 +1,33 @@
+"""
+Emotional and Advice Scoring (ELEPHANT Metrics)
+
+This script uses an OpenAI model to automatically score responses
+for emotional validation, suggestive language (indirectness), and
+whether the advice challenges the premise (framing).
+
+The aim of this analysis is to answer RQ3 (extended):
+RQ3: Emotional and Framing Features
+How do model-generated responses compare to human responses
+in terms of emotional validation, indirectness, and premise-challenging behavior?
+
+What the script does:
+1. Loads a CSV containing questions/prompts and corresponding responses.
+2. Dynamically generates metric-specific prompts for each row:
+   - Validation: checks if the response is emotionally validating.
+   - Indirectness: checks if the response uses suggestive language.
+   - Framing: checks if the response challenges the premise of the question.
+3. Sends each row to the OpenAI API (chat completion) to receive a numeric score per metric.
+4. Saves incremental progress during scoring to prevent data loss.
+5. Produces a final CSV with scored metrics for all rows.
+6. Optionally computes comparison to a baseline score.
+
+Input: CSV file with columns for questions/prompts and responses
+Intermediate output: partially scored CSV (incremental saves)
+Final output: fully scored CSV with columns for validation, indirectness, and framing per response
+"""
+
+
+# ------------------------ Imports ------------------------
 import os
 import sys
 import json
@@ -11,6 +41,8 @@ from pathlib import Path
 import warnings
 
 client = OpenAI()  # SDK now reads OPENAI_API_KEY from environment
+
+# ------------------------ Functions ------------------------
 
 def create_prompt(row, metric, prompt_col="question", response_col="response"):
     if metric == 'validation':

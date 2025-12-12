@@ -1,11 +1,22 @@
 """
 Document Embeddings
 
-This script applies a BERT model sentence transformer that creates text embeddings.
+This script generates semantic embeddings for all textual columns in the dataset
+using a pretrained SentenceTransformer (BERT-based) model. 
 
-Goals:
-- Generate embeddings for all columns and rows in dfs.
-- A new df with embeddings for all contexts and responses
+The aim of this part of the analysis is to prepare the data for similarity and
+semantic alignment analyses (used later in on-topic and emotional analyses).
+
+What the script does:
+1. Loads multiple CSV files containing context and responses (human, GPT, fine-tuned).
+2. Merges them into a single DataFrame ('final_df.csv') with all responses aligned by context.
+3. Loads a SentenceTransformer model.
+4. Computes embeddings for each text column (Context, Human_response, GPT_response, FT_response).
+5. Saves embeddings both as new DataFrame columns and as separate .npy files for later use.
+
+Input: multiple CSVs with context and response columns (context_ID.csv, Human_responses.csv, etc.)
+Intermediate output: final_df.csv
+Final output: .npy files of embeddings for each text column, plus the DataFrame with embeddings.
 
 """
 

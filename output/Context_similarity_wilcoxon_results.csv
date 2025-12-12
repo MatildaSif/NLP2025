@@ -1,0 +1,4 @@
+comparison,statistic,p_value,significant_bonferroni
+Human vs GPT,25729.0,7.549397459060982e-99,True
+Human vs FT,132663.0,4.8740041543243973e-08,True
+FT vs GPT,9270.0,3.166356317419329e-122,True

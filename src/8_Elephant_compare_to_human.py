@@ -1,13 +1,27 @@
 """
-Data analysis and visualization script for ELEPHANT Metrics
+ELEPHANT Metrics Analysis
 
-This script processes validation data and generates plots comparing
-model performance on social sycophancy metrics.
+This script processes validation data to evaluate social sycophancy behaviors
+of human, GPT, and fine-tuned (FT) model responses on OEQ items.
 
-Dependencies:
-- Pandas for data manipulation
-- Matplotlib and Seaborn for visualization
-- SciPy for statistical calculations
+The aim of this analysis is to answer RQ3:
+RQ3: Social Sycophancy
+How do model-generated responses differ from human responses
+on metrics of validation, indirectness, and framing?
+
+What the script does:
+1. Loads validation CSV files for human, GPT, and FT responses.
+2. Merges the datasets into a single DataFrame ('final_df_sycophancy.csv').
+3. Computes mean scores and 95% confidence intervals for each metric per model.
+4. Generates a grouped bar plot comparing human, GPT, and FT responses.
+5. Computes differences from the human baseline for GPT and FT models,
+   along with confidence intervals for these differences.
+6. Saves processed metrics, difference calculations, and plots to CSV and PNG files.
+
+Input: Human_validation.csv, GPT_validation.csv, FT_validation.csv
+Intermediate output: final_df_sycophancy.csv
+Final output: elephant_metrics_results.csv, elephant_metrics_differences.csv, elephant_metrics_plot.png
+
 """
 
 # ------------------------ Imports ------------------------
