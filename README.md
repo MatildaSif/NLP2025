@@ -222,34 +222,44 @@ The output will be saved in the `output/` folder inside the `NLP2025` directory,
 
 ##### DataCleaning.py
 
-Input: Original_Human_responses.csv
+**Input:**
+Original_Human_responses.csv
 
-Outputs:
-
+**Outputs:**
 Human_responses.csv
 context_ID.csv
 
 ##### Generic_LLM_responses.py
 
-Input: context_ID.csv
+**Input:**
+context_ID.csv
 
-Requires: API_key.txt (user must create this file with their own API key)
+**Requires:**
+API_key.txt (user must create this file with their own API key)
 
-Output: GPT_responses.csv
+**Output:**
+GPT_responses.csv
 
 ##### Finetuned_LLM_responses.py
 
-Input: context_ID.csv
+**Input:**
+context_ID.csv
 
-Requires: GPUs on the machine the script is run on. Preferably 2-3
+**Requires:**
+GPUs on the machine the script is run on. Preferably 2-3
 
-Output: FT_responses.csv
+**Output:**
+FT_responses.csv
 
 #### 1_Embeddings.py
 
-Input: "context_ID.csv", "Human_responses.csv", "GPT_responses.csv", "FT_responses.csv"
+**Input:**
+context_ID.csv
+Human_responses.csv
+GPT_responses.csv
+FT_responses.csv
 
-Outputs:
+**Outputs:**
 final_df.csv
 emb-context.py
 emb-ft_response.py
@@ -260,17 +270,21 @@ emb-human_response.py
 
 ##### 2_Lexical_analysis.py
 
-Input: final_df.csv
+**Input:**
+final_df.csv
 
-Intermediate Output: lexical_analysis.csv
+**Intermediate Output:**
+lexical_analysis.csv
 
-Final Output: lexical_summary.csv
+**Final Output:**
+lexical_summary.csv
 
 ##### 3_Lexical_plot.py
 
-Input: lexical_summary.csv
+**Input:**
+lexical_summary.csv
 
-Outputs:
+**Outputs:**
 CTTR_density.png
 MTLD_density.png
 
@@ -278,9 +292,11 @@ MTLD_density.png
 
 ##### 4_Context_CosineSimilarities.py
 
-Input: Human_responses.csv, embeddings from "data/emb/"
+**Input:**
+Human_responses.csv
+embeddings from "data/emb/"
 
-Outputs:
+**Outputs:**
 Context_similarity_cosine_similarity_kde_by_topic.png
 Context_similarity_cosine_similarity_kde.png
 Context_Similarity_overall_statistics.csv
@@ -291,15 +307,18 @@ Context_similarity_wilcoxon_results.csv
 
 ##### 5_EmotionClassification.py
 
-Input: final_df.csv
+**Input:**
+final_df.csv
 
-Output: emotion_analysis.csv
+**Output:**
+emotion_analysis.csv
 
 ##### 6_EmotionStats.py
 
-Input: emotion_analysis.csv
+**Input:**
+emotion_analysis.csv
 
-Outputs:
+**Outputs:**
 Prints Wilcoxon test results in terminal
 emotion_distribution.png
 
@@ -307,7 +326,7 @@ emotion_distribution.png
 ### Sycophancy Analysis
 
 ##### 7_Elephant_sycophancy_scorers.py
-Input Parameters:
+**Input Parameters:**
   For Human responses sycophancy scores:
     --input_file data/Human_responses.csv
     --prompt_column Context
@@ -335,17 +354,21 @@ Input Parameters:
     --validation --indirectness --framing
     --save_interval 10
 
-Requires: key.txt (user must create this file with their own API key)
+**Requires:**
+key.txt (user must create this file with their own API key)
 
-Outputs:
+**Outputs:**
 Human_validation.csv
 FT_validation.csv
 GPT_validation.csv
 
 ##### 8_Elephant_compare_to_human.py
-Inputs: Human_validation.csv, GPT_validation.csv, FT_validation.csv
+**Inputs:**
+Human_validation.csv
+GPT_validation.csv
+FT_validation.csv
 
-Outputs:
+**Outputs:**
 final_df_sycophancy.csv
 elephant_metrics_results.csv
 elephant_metrics_plot.png
