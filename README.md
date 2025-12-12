@@ -220,24 +220,24 @@ The output will be saved in the `output/` folder inside the `NLP2025` directory,
 
 ### Data Preparation and cleaning
 
-##### DataCleaning.py
+### DataCleaning.py
 
-**Input:**
+_Input:_
 Original_Human_responses.csv
 
-**Outputs:**
+_Outputs:_
 Human_responses.csv
 context_ID.csv
 
-##### Generic_LLM_responses.py
+### Generic_LLM_responses.py
 
-**Input:**
+_Input:_
 context_ID.csv
 
-**Requires:**
+_Requires:_
 API_key.txt (user must create this file with their own API key)
 
-**Output:**
+_Output:_
 GPT_responses.csv
 
 ##### Finetuned_LLM_responses.py
