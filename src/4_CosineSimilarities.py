@@ -249,6 +249,40 @@ def save_statistics(overall_stats, topic_stats, output_path, prefix):
         print(f"Per-topic statistics saved to: {topic_file}")
 
 
+def run_wilcoxon(rowwise_sims):
+    """
+    Run Wilcoxon signed-rank tests on the three cosine similarity arrays.
+    """
+
+    human = rowwise_sims["context-human_response"]
+    ft = rowwise_sims["context-ft_response"]
+    gpt = rowwise_sims["context-gpt_response"]
+
+    # Perform paired Wilcoxon tests
+    w_human_gpt = stats.wilcoxon(human, gpt)
+    w_human_ft = stats.wilcoxon(human, ft)
+    w_ft_gpt = stats.wilcoxon(ft, gpt)
+
+    print("Human vs GPT:", w_human_gpt)
+    print("Human vs FT:", w_human_ft)
+    print("FT vs GPT:", w_ft_gpt)
+
+   # Save to CSV
+    results_df = pd.DataFrame([
+        ["Human vs GPT", w_human_gpt.statistic, w_human_gpt.pvalue],
+        ["Human vs FT", w_human_ft.statistic, w_human_ft.pvalue],
+        ["FT vs GPT", w_ft_gpt.statistic, w_ft_gpt.pvalue]
+    ], columns=["comparison", "statistic", "p_value"])
+
+    os.makedirs(output_path, exist_ok=True)
+    file_path = os.path.join(output_path, "wilcoxon_results.csv")
+    results_df.to_csv(file_path, index=False)
+
+    print(f"Wilcoxon results saved to: {file_path}")
+
+    return results_df
+
+
 ''' Define Parameters '''
 save_path = "data/emb/"
 output_path = "output/"
@@ -278,6 +312,9 @@ if __name__ == "__main__":
     # Compute average cosine similarities
     avg_cos_sim, rowwise_sims = compute_cosine_similarity(save_path, column_pairs = column_pairs_topic)
     print("Average Cosine Similarities:", avg_cos_sim)
+
+    # Run statistical testing
+    wilcox_results = run_wilcoxon_simple(rowwise_sims)
     
     # Overall plots
     plot_kde(rowwise_sims, output_path, filename ="Topic_cosine_similarity_kde.png")
