@@ -4,10 +4,11 @@
 1. [Project Description](#description)
 2. [Project Structure](#structure)
 3. [Installation](#installation)
-4. [Data Source](#data)
-5. [Usage](#usage)
-6. [Summary of outputs](#summary)
-7. [Discussion of limitations and steps for improvement](#discussion)
+4. [Dependencies](#dependencies)
+5. [Data Source](#data)
+6. [Usage](#usage)
+7. [File and Pipeline Overview](#fileoverview)
+8. [Counsel Chat Copyright notice](#copyrightnotice)
 
 ## Project Description
 This project explores language usage from ChatGPT, a fine-tuned LLM and human therapists in the context of real-life mental health queries. Lexical features, cosine similarity to contexts, emotional alignemnt and sycophancy are the parameters explored.
@@ -63,14 +64,16 @@ To get started with this project, follow these steps:
 
 1. change directories into the projects repository: /NLP2025
 2. The data has already been created for you and can be found in the data/ folder but if you would like to re-generate the generic and fine-tuned LLM responses then follow the instructions under the Data Source section to generate the data yourself.
-3. To run the following files: 7_Elephant_sycophancy_scorers.py and Generic_LLM_response.py, API keys are required. Follow the instructions in ## Dependencies to continue.
-4. To run the Finetuned_LLM_responses.py, GPUs are required. Follow the instructions in ## Dependencies to continue.
+3. To run the following files: 7_Elephant_sycophancy_scorers.py and Generic_LLM_response.py, API keys are required. Follow the instructions in #dependencies to continue.
+4. To run the Finetuned_LLM_responses.py, GPUs are required. Follow the instructions in #dependencies to continue.
 5. In the terminal, run `./setup.sh` to set up the Python virtual environment and install all dependencies from requirements.txt . 
    - If you encounter a permission error, run `chmod +x setup.sh` and try again.
 6. Run `./run.sh` to execute the pipeline.
    - Adjust the script if you are using custom paths.
    - If you encounter a permission error, run `chmod +x run.sh` and try again
    - Scripts can be run individually if required, as all outputs are already saved.
+  
+
   
 ## Dependencies
 A full list of package requirements and dependencies can be found in the requirements.txt file.
@@ -116,8 +119,9 @@ A full list of package requirements and dependencies can be found in the require
       `
 - Now return to the Installation instructions
 
+
 ## Data Source
-The data can be found at the link below:
+The data can be found at the link below and the #copyrightnotice can be found at the bottom of this README.md:
 [XX](https://github.com/nbertagnolli/counsel-chat/tree/master/data)
 
 _Steps to download the data:_
@@ -210,6 +214,7 @@ In the case that other pre-generated data files have been deleted and nothing is
 ## Usage
 Double check the folder_path and output_path (defined under the "Application" section of the main script)are set correctly in the python scripts based on your directory structure.
 The output will be saved in the `output/` folder inside the `NLP2025` directory, unless a different output_path is defined.
+
 
 ## File and Pipeline Overview
 
@@ -347,6 +352,15 @@ elephant_metrics_plot.png
 elephant_metrics_differences.csv
 
 
+## Counsel Chat Copyright notice
+MIT License
 
+Copyright (c) 2020 nbertagnolli
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
