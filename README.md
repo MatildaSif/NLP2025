@@ -81,11 +81,11 @@ A full list of package requirements and dependencies can be found in the require
 #### Generic_LLM_response.py
    - Create a txt-file called .env (with no file-type-name shown) and place it in the folder with the script. This file should not be pushed to GitHub.
    - OR Create a file named api_key.txt in the project folder and paste in your API key. --> RECOMMENDED.
-   - Now return to the Installation instructions
+   - Now return to the #installation instructions
 
 #### Finetuned_LLM_response.py
    - A machine with GPUs is required for this file to run. It take a long time so be patient, even with the GPUs. We ran the script using 3 GPUs.
-   - Now return to the Installation instructions.
+   - Now return to the #installation instructions.
   
 #### 7_Elephant_sycophancy_scorers.py
    - You need a key.txt file at the NLP2025 level with your API key that begins with sk-proj-
@@ -117,7 +117,7 @@ A full list of package requirements and dependencies can be found in the require
       --validation --indirectness --framing
       --save_interval 10
       `
-- Now return to the Installation instructions
+- Now return to the #installation instructions
 
 
 ## Data Source
