@@ -220,7 +220,7 @@ The output will be saved in the `output/` folder inside the `NLP2025` directory,
 
 ### Data Preparation and cleaning
 
-### DataCleaning.py
+**DataCleaning.py**
 
 _Input:_
 Original_Human_responses.csv
@@ -229,7 +229,7 @@ _Outputs:_
 Human_responses.csv
 context_ID.csv
 
-### Generic_LLM_responses.py
+**Generic_LLM_responses.py**
 
 _Input:_
 context_ID.csv
@@ -240,26 +240,26 @@ API_key.txt (user must create this file with their own API key)
 _Output:_
 GPT_responses.csv
 
-##### Finetuned_LLM_responses.py
+**Finetuned_LLM_responses.py**
 
-**Input:**
+_Input:_
 context_ID.csv
 
-**Requires:**
+_Requires:_
 GPUs on the machine the script is run on. Preferably 2-3
 
-**Output:**
+_Output:_
 FT_responses.csv
 
-#### 1_Embeddings.py
+**1_Embeddings.py**
 
-**Input:**
+_Input:_
 context_ID.csv
 Human_responses.csv
 GPT_responses.csv
 FT_responses.csv
 
-**Outputs:**
+_Outputs:_
 final_df.csv
 emb-context.py
 emb-ft_response.py
@@ -268,35 +268,35 @@ emb-human_response.py
 
 ### Lexical Analysis
 
-##### 2_Lexical_analysis.py
+**2_Lexical_analysis.py**
 
-**Input:**
+_Input:_
 final_df.csv
 
-**Intermediate Output:**
+_Intermediate Output:_
 lexical_analysis.csv
 
-**Final Output:**
+_Final Output:_
 lexical_summary.csv
 
-##### 3_Lexical_plot.py
+**3_Lexical_plot.py**
 
-**Input:**
+_Input:_
 lexical_summary.csv
 
-**Outputs:**
+_Outputs:_
 CTTR_density.png
 MTLD_density.png
 
 ### Context Similarity Analysis
 
-##### 4_Context_CosineSimilarities.py
+**4_Context_CosineSimilarities.py**
 
-**Input:**
+_Input:_
 Human_responses.csv
 embeddings from "data/emb/"
 
-**Outputs:**
+_Outputs:_
 Context_similarity_cosine_similarity_kde_by_topic.png
 Context_similarity_cosine_similarity_kde.png
 Context_Similarity_overall_statistics.csv
@@ -305,70 +305,52 @@ Context_similarity_wilcoxon_results.csv
 
 ### Emotional Alignment Analysis
 
-##### 5_EmotionClassification.py
+**5_EmotionClassification.py**
 
-**Input:**
+_Input:_
 final_df.csv
 
-**Output:**
+_Output:_
 emotion_analysis.csv
 
-##### 6_EmotionStats.py
+**6_EmotionStats.py**
 
-**Input:**
+_Input:_
 emotion_analysis.csv
 
-**Outputs:**
+_Outputs:_
 Prints Wilcoxon test results in terminal
 emotion_distribution.png
 
 
 ### Sycophancy Analysis
 
-##### 7_Elephant_sycophancy_scorers.py
-**Input Parameters:**
+**7_Elephant_sycophancy_scorers.py**
+_Input Parameters:_
   For Human responses sycophancy scores:
-    --input_file data/Human_responses.csv
-    --prompt_column Context
-    --response_column Human_response
-    --output_column_tag Human_sychophancy
-    --output_file data/Human_validation.csv
-    --validation --indirectness --framing
-    --save_interval 10
+    Human_responses.csv
 
   For Fine-tuned responses sycophancy scores:
-    --input_file data/FT_responses.csv
-    --prompt_column Context
-    --response_column FT_response
-    --output_column_tag FT_sychophancy
-    --output_file data/FT_validation.csv
-    --validation --indirectness --framing
-    --save_interval 10
+    FT_responses.csv
 
   For GPT responses sycophancy scores:
-    --input_file data/GPT_responses.csv
-    --prompt_column Context
-    --response_column GPT_response
-    --output_column_tag GPT_sychophancy
-    --output_file data/GPT_validation.csv
-    --validation --indirectness --framing
-    --save_interval 10
+    GPT_responses.csv
 
-**Requires:**
+_Requires:_
 key.txt (user must create this file with their own API key)
 
-**Outputs:**
+_Outputs:_
 Human_validation.csv
 FT_validation.csv
 GPT_validation.csv
 
-##### 8_Elephant_compare_to_human.py
-**Inputs:**
+**8_Elephant_compare_to_human.py**
+_Inputs:_
 Human_validation.csv
 GPT_validation.csv
 FT_validation.csv
 
-**Outputs:**
+_Outputs:_
 final_df_sycophancy.csv
 elephant_metrics_results.csv
 elephant_metrics_plot.png
