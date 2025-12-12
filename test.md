@@ -190,6 +190,21 @@ In the case that other pre-generated data files have been deleted and nothing is
   
     # close the environment
     deactivate
+
+### Overview of data files
+
+   - 20200325_counsel_chat.csv = original downloaded name of data from huggingface - scraped from counsel chat
+   - FT_responses.csv = generated from huggingface model using Finetuned_LLM_response.py script
+   - FT_validation.csv = the FT_responses with their sycophancy metric scores
+   - GPT_responses.csv = generated from generic LLM using Generic_LLM_response.py script
+   - GPT_validation.csv = the GPT_responses with their sycophancy metric scores
+   - Human_responses.csv = the filtered data from Original_Human_responses.csv - there's one human response per context, selected randomly from the responses with the most upvotes
+   - Human_validation.csv = the Human_responses with their sycophancy metric scores
+   - Original_Human_responses.csv = same file as 20200325_counsel_chat.csv, but renamed for simplicity
+   - context_ID.csv = the human responses post cleaning (with only context and ID pairs) - made from Human_responses.csv, but just with the responses removed - used to avoid data overlap if the human responses were presented along with the contexts.
+   - final_df.csv = the final cleaned df with all types of responses per context. Merged from GPT_responses.csv, context_Id.csv, HF_responses.csv, Human_responses.csv
+   - final_df_sycophancy.csv = FT_validation.csv, GPT_validation.csv, Human_validation.csv merged
+   - lexical_analysis.csv = results from lexical analysis saved to csv.
     `
 
 ## Usage
