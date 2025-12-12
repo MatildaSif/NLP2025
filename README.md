@@ -122,7 +122,7 @@ A full list of package requirements and dependencies can be found in the require
 
 ## Data Source
 The data can be found at the link below and the #copyrightnotice can be found at the bottom of this README.md:
-[XX](https://github.com/nbertagnolli/counsel-chat/tree/master/data)
+(https://github.com/nbertagnolli/counsel-chat/tree/master/data)
 
 _Steps to download the data:_
 1. Download the data file called "20200325_counsel_chat.csv" from the above link
