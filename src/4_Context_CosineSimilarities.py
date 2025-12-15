@@ -36,7 +36,6 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import seaborn as sns
 import pandas as pd
-import umap
 from scipy import stats
 
 

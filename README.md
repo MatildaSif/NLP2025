@@ -37,10 +37,6 @@ NLP2025/
 │   └── lexical_summary.csv
 │
 ├── src/
-│   ├── data_creation/
-│         ├── DataCleaning.npy
-│         ├── Finetuned_LLM_response.npy
-│         └── Generic_LLM_response.npy
 │   ├── 1_Lexical_analysis.py
 │   ├── 2_Lexical_plot.py
 │   ├── 3_Embeddings.py
@@ -49,6 +45,9 @@ NLP2025/
 │   ├── 6_EmotionStats.py
 │   ├── 7_Elephant_sycophancy_scorers.py
 │   ├── 8_Elephant_compare_to_human.py
+│   ├── DataCleaning.npy
+│   ├── Finetuned_LLM_response.npy
+│   ├── Generic_LLM_response.npy
 │   └── utils.py
 │
 ├── .gitignore
@@ -142,9 +141,9 @@ In the case that other pre-generated data files have been deleted and nothing is
 2. In order to run the Generic_LLM_response.py, ensure you have a OpenAI API-key to generate prompt responses and enough GPUs to run the Finetuned_LLM_response.py script. Follow the instruction in ## Dependencies to implement this.
 
 3. Add the following lines to the run.sh script under "# run the script":
-    python src/data_creation/DataCleaning.py
-    python src/data_creation/Finetuned_LLM_response.py
-    python src/data_creation/Generic_LLM_response.py
+    python src/DataCleaning.py
+    python src/Finetuned_LLM_response.py
+    python src/Generic_LLM_response.py
 
   The final run.sh script should look like this if you want to run the full pipeline with analyses as well:
   ` #!/usr/bin/bash
@@ -153,9 +152,9 @@ In the case that other pre-generated data files have been deleted and nothing is
     source ./env/bin/activate
 
     # run the script
-    python src/data_creation/DataCleaning.py
-    python src/data_creation/Finetuned_LLM_response.py
-    python src/data_creation/Generic_LLM_response.py
+    python src/DataCleaning.py
+    python src/Finetuned_LLM_response.py
+    python src/Generic_LLM_response.py
     python src/1_Lexical_analysis.py
     python src/2_Lexical_plot.py
     python src/3_Embeddings.py
