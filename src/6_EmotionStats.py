@@ -125,6 +125,15 @@ gpt = df["GPT_response_emotion_similarity"]
 # - Scores are bounded between 0 and 1
 # - The distribution is non-normal
 
+# Set alpha level and apply Bonferroni correction for multiple comparisons
+alpha = 0.05
+n_comparisons = 3
+bonferroni_alpha = alpha / n_comparisons
+
+print(f"\nAlpha level: {alpha}")
+print(f"Bonferroni-corrected alpha: {bonferroni_alpha:.4f} ({alpha}/{n_comparisons})")
+print("="*60)
+
 # Human vs GPT
 w_human_gpt = wilcoxon(human, gpt)
 # Human vs FT
@@ -132,10 +141,18 @@ w_human_ft = wilcoxon(human, ft)
 # FT vs GPT
 w_ft_gpt = wilcoxon(ft, gpt)
 
-# prints the results
-print("Human vs GPT:", w_human_gpt)
-print("Human vs FT:", w_human_ft)
-print("FT vs GPT:", w_ft_gpt)
+# prints the results with significance indicators
+print("\nWilcoxon Signed-Rank Test Results:")
+print("-"*60)
+print(f"Human vs GPT: W = {w_human_gpt.statistic:.1f}, p = {w_human_gpt.pvalue:.2e}")
+print(f"  Significant at Bonferroni-corrected α = {bonferroni_alpha:.4f}: {w_human_gpt.pvalue < bonferroni_alpha}")
+
+print(f"\nHuman vs FT: W = {w_human_ft.statistic:.1f}, p = {w_human_ft.pvalue:.4f}")
+print(f"  Significant at Bonferroni-corrected α = {bonferroni_alpha:.4f}: {w_human_ft.pvalue < bonferroni_alpha}")
+
+print(f"\nFT vs GPT: W = {w_ft_gpt.statistic:.1f}, p = {w_ft_gpt.pvalue:.2e}")
+print(f"  Significant at Bonferroni-corrected α = {bonferroni_alpha:.4f}: {w_ft_gpt.pvalue < bonferroni_alpha}")
+print("="*60)
 
 
 # Calculate and save similarity statistics
