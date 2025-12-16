@@ -25,7 +25,10 @@ Output:
 ''' ----------------------- SETUP ----------------------'''
 # Load packages
 import pandas as pd
+import numpy as np
 import ast
+import os
+from scipy import stats
 from scipy.stats import wilcoxon
 import matplotlib.pyplot as plt
 
@@ -53,9 +56,65 @@ for prefix in ["Context", "Human_response", "FT_response", "GPT_response"]:
     df[f"{prefix}_top"] = df[f"{prefix}_emotion"].apply(top_emotion)
 
 
+def calculate_similarity_stats(rowwise_sims):
+    """
+    Calculate mean, SD, and 95% confidence intervals for cosine similarities.
+    
+    Args:
+        rowwise_sims (dict): dictionary with row-wise cosine similarities
+    
+    Returns:
+        pd.DataFrame: overall statistics dataframe
+    """
+    
+    # Helper function to calculate stats
+    def compute_stats(data):
+        n = len(data)
+        mean = np.mean(data)
+        sd = np.std(data, ddof=1)
+        se = stats.sem(data)
+        ci = stats.t.interval(0.95, n-1, loc=mean, scale=se)
+        
+        return {
+            'n': n,
+            'mean': mean,
+            'sd': sd,
+            'ci_lower': ci[0],
+            'ci_upper': ci[1]
+        }
+    
+    # Overall statistics
+    overall_data = []
+    for name, sims in rowwise_sims.items():
+        stat_dict = compute_stats(sims)
+        stat_dict['pair'] = name
+        overall_data.append(stat_dict)
+    
+    overall_stats_df = pd.DataFrame(overall_data)
+    overall_stats_df = overall_stats_df[['pair', 'n', 'mean', 'sd', 'ci_lower', 'ci_upper']]
+    
+    return overall_stats_df
+
+
+def save_statistics(overall_stats, output_path):
+    """
+    Save statistics to CSV files.
+    
+    Args:
+        overall_stats (pd.DataFrame): overall statistics dataframe
+        output_path (str): folder where files should be saved
+    """
+    os.makedirs(output_path, exist_ok=True)
+    
+    # Save overall statistics
+    overall_file = os.path.join(output_path, "emotion_similarity_overall_statistics.csv")
+    overall_stats.to_csv(overall_file, index=False)
+    print(f"Overall statistics saved to: {overall_file}")
+
+
 ''' ---------------------- Statistics ------------------------'''
 # extract the emotional similarity columns
-# Higher value = the response is emotionally closer to the client’s emotion vector
+# Higher value = the response is emotionally closer to the client's emotion vector
 human = df["Human_response_emotion_similarity"]
 ft = df["FT_response_emotion_similarity"]
 gpt = df["GPT_response_emotion_similarity"]
@@ -77,6 +136,17 @@ w_ft_gpt = wilcoxon(ft, gpt)
 print("Human vs GPT:", w_human_gpt)
 print("Human vs FT:", w_human_ft)
 print("FT vs GPT:", w_ft_gpt)
+
+
+# Calculate and save similarity statistics
+rowwise_sims = {
+    'Human': human.values,
+    'FT': ft.values,
+    'GPT': gpt.values
+}
+
+overall_stats = calculate_similarity_stats(rowwise_sims)
+save_statistics(overall_stats, "/work/NLP2025/output/")
 
 
 ''' -------------------- Emotion distribution comparison --------------------- '''

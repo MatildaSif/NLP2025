@@ -320,6 +320,7 @@ emotion_analysis.csv
 _Outputs:_
 Prints Wilcoxon test results in terminal
 emotion_distribution.png
+emotion_similarity_overall_statistics.csv
 
 
 ### Sycophancy Analysis
