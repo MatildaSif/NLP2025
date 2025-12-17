@@ -9,6 +9,7 @@
 6. [Usage](#usage)
 7. [File and Pipeline Overview](#fileoverview)
 8. [Counsel Chat Copyright notice](#copyrightnotice)
+9. [References](#references)
 
 ## Project Description
 This project explores language usage from ChatGPT, a fine-tuned LLM and human therapists in the context of real-life mental health queries. Lexical features, cosine similarity to contexts, emotional alignemnt and sycophancy are the parameters explored.
@@ -369,3 +370,28 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+## References
+- All-MiniLM-L6-v2. (2024, January 5). https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+- bertagnolli, nicolas. (2020). Nbertagnolli/counsel-chat [Jupyter Notebook]. https://github.com/nbertagnolli/counsel-chat
+- Bertagnolli, N. (2020). Counsel-chat/LICENSE at master · nbertagnolli/counsel-chat. GitHub. https://github.com/nbertagnolli/counsel-chat/blob/master/LICENSE
+- Bertagnolli, N. (2023, February 7). Counsel Chat: Bootstrapping High-Quality Therapy Data. TDS Archive. https://medium.com/data-science/counsel-chat-bootstrapping-high-quality-therapy-data-971b419f33da
+- CounselChat. (2025, April 12). https://counselchat.com/
+- da Costa-Luis, C., Larroque, S. K., Altendorf, K., Mary, H., & The tqdm contributors. (2025). tqdm (Version 4.67.1) [Computer software]. https://tqdm.github.io/
+- Harris, C. R., Millman, K. J., van der Walt, S. J., Gommers, R., Virtanen, P., Cournapeau, D., Wieser, E., Taylor, J., Berg, S., Smith, N. J., Kern, R., Picus, M., Hoyer, S., van Kerkwijk, M. H., Brett, M., Haldane, A., del Río, J. F., Wiebe, M., Peterson, P., … Oliphant, T. E. (2025). NumPy (Version 2.3.5) [Computer software]. https://numpy.org/
+- Hartmann, J. (2022). Emotion English DistilRoBERTa-base. https://huggingface.co/j-hartmann/emotion-english-distilroberta-base
+- Honnibal, M., Montani, I., Van Landeghem, S., & Boyd, A. (2025). spaCy (Version 3.8.11) [Computer software]. https://spacy.io/
+- Hunter, J. D. (2025). Matplotlib (Version 3.10.7) [Computer software]. https://matplotlib.org/
+- McKinney, W., & The pandas development team. (2025). Pandas (Version 2.3.3) [Computer software]. https://pandas.pydata.org/
+- Meta AI. (2023). Meta-llama/Llama-2-7b · Hugging Face. https://huggingface.co/meta-llama/Llama-2-7b
+- Model—OpenAI API. (2025, December 4). https://platform.openai.com
+- OpenAI. (2025, October 27). Model Release Notes. OpenAI Help Center. https://help.openai.com/en/articles/9624314-model-release-notes?utm_source=chatgpt.com
+- OpenAI. (2025). OpenAI Python (Version 2.8.1) [Computer software]. https://github.com/openai/openai-python
+- Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Köpf, A., Yang, E., DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., … Chintala, S. (2025). PyTorch (Version 2.9.1) [Computer software]. https://pytorch.org/
+- Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P., Weiss, R., Dubourg, V.,
+- Reimers, N., & Gurevych, I. (2025). Sentence-Transformers (Version 5.2.0) [Computer software]. https://www.sbert.net/
+- Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M., & Duchesnay, É. (2025). Scikit-learn (Version 1.7.2) [Computer software]. https://scikit-learn.org/
+- Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., Rault, T., Louf, R., Funtowicz, M., Davison, J., Shleifer, S., von Platen, P., Ma, C., Jernite, Y., Plu, J., Xu, C., Le Scao, T., Gugger, S., … Rush, A. M. (2025). Transformers (Version 4.57.3) [Computer software]. https://github.com/huggingface/transformers
+- spaCy Models. (2017, March 17). https://spacy.io/models/en#en_core_web_sm
+- Tanusrich/Mental_Health_Chatbot · Hugging Face. (2024). https://huggingface.co/tanusrich/Mental_Health_Chatbot
+- Virtanen, P., Gommers, R., Oliphant, T. E., Haberland, M., Reddy, T., Cournapeau, D., Burovski, E., Peterson, P., Weckesser, W., Bright, J., van der Walt, S. J., Brett, M., Wilson, J., Millman, K. J., Mayorov, N., Nelson, A. R. J., Jones, E., Kern, R., Larson, E., … SciPy 1.0 Contributors. (2025). SciPy (Version 1.16.3) [Computer software]. https://scipy.org/
+- Waskom, M., & The seaborn development team. (2023). Seaborn (Version 0.13.2) [Computer software]. https://seaborn.pydata.org/
